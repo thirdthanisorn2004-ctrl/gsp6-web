@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LV 3628SW02A-B — GSP6</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0}
+  html,body{height:100%}
+  .zbtn{width:38px;height:38px;border:none;border-radius:9px;background:#fff;color:#11202f;font-size:19px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(10,30,60,.14);display:flex;align-items:center;justify-content:center;}
+  .zbtn:hover{background:#eaf1fb;}
+</style>
+</head>
+<body style="font-family:'Plus Jakarta Sans',sans-serif;background:#f7f9fc;height:100vh;display:flex;flex-direction:column;overflow:hidden;">
+  <div style="display:flex; align-items:center; gap:40px; height:62px; flex-shrink:0; background:linear-gradient(180deg,#0b4f95,#003d7c); color:#fff; padding:0 24px;">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#cfe0f5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 L20 6 V11 C20 16 16.5 20 12 22 C7.5 20 4 16 4 11 V6 Z"/><path d="M9 12 l2 2 l4 -4.5"/></svg>
+      <span style="font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:16px; letter-spacing:-.01em; white-space:nowrap;">VoltStream SLD</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:30px; font-size:14px; font-weight:500; white-space:nowrap;">
+      <a href="plantselection.html" style="color:rgba(255,255,255,.72); text-decoration:none;">Plant Selection</a>
+      <a href="GSP6 Diagnostics.dc.html" style="color:rgba(255,255,255,.72); text-decoration:none;">Diagnostics</a>
+      <div style="color:#fff; font-weight:600; padding:20px 0; border-bottom:2.5px solid #2bd07a;">LV 3628SW02A-B</div>
+    </div>
+    <div style="flex:1;"></div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;background:rgba(255,255,255,.14);padding:4px 10px;border-radius:999px;">GSP6 · 0.4kV</div>
+  </div>
+  <div id="relayModal" style="display:none;position:fixed;inset:0;z-index:100;align-items:stretch;justify-content:stretch;">
+    <div id="relayCard" style="width:100%;height:100%;"></div>
+  </div>
+  <div id="feederModal" style="display:none;position:fixed;inset:0;z-index:90;background:rgba(8,20,38,.35);">
+    <div id="feederPanel" style="position:absolute;top:0;right:0;height:100%;width:420px;max-width:92vw;background:#f3f6fa;box-shadow:-8px 0 30px rgba(10,30,60,.22);display:flex;flex-direction:column;transform:translateX(0);"></div>
+  </div>
+  <div id="motorModal" style="display:none;position:fixed;inset:0;z-index:90;background:rgba(8,20,38,.35);">
+    <div id="motorPanel" style="position:absolute;top:0;right:0;height:100%;width:420px;max-width:92vw;background:#f3f6fa;box-shadow:-8px 0 30px rgba(10,30,60,.22);display:flex;flex-direction:column;"></div>
+  </div>
+  <div id="motor3Modal" style="display:none;position:fixed;inset:0;z-index:90;background:rgba(8,20,38,.35);">
+    <div id="motor3Panel" style="position:absolute;top:0;right:0;height:100%;width:420px;max-width:92vw;background:#f3f6fa;box-shadow:-8px 0 30px rgba(10,30,60,.22);display:flex;flex-direction:column;"></div>
+  </div>
+  <main style="flex:1;position:relative;overflow:hidden;">
+    <div id="stage" style="position:absolute;inset:0;cursor:grab;">
+      <div id="wrap" style="position:absolute;left:0;top:0;transform-origin:0 0;">
+        <img id="sld" src="lv_3628sw02.svg" alt="LV 3628SW02A-B SLD" draggable="false"
+             style="display:block;user-select:none;-webkit-user-drag:none;">
+        <svg id="ov" viewBox="0 0 1923.74 527.77" style="position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;"></svg>
+      </div>
+    </div>
+    <div style="position:absolute;right:18px;bottom:18px;display:flex;flex-direction:column;gap:8px;">
+      <button class="zbtn" id="zin">+</button>
+      <button class="zbtn" id="zout">&minus;</button>
+      <button class="zbtn" id="zfit" style="font-size:12px;font-weight:700;">FIT</button>
+    </div>
+  </main>
+<script>
+(function(){
+  var stage=document.getElementById('stage'), img=document.getElementById('sld'), wrap=document.getElementById('wrap'), ov=document.getElementById('ov');
+  var scale=1, tx=0, ty=0, natW=0, natH=0, min=0.1, max=8;
+  var RELAYS=[["3628SW651A",59,58,12,14],["3628SW651B",164,58,12,14],["3628SW653",212,47,12,14],["3628SW652",104,195,12,14],["3628SW654A",485,129,12,14],["3628SW02-F25",1119,129,12,14],["3628SW02-F21",1028,325,12,14],["3628SW02-F27",1142,325,12,14],["3628EDP01A",258,129,12,14],["3626EML01_2",306,129,12,14],["3626EML01",348,129,12,14],["3628SW02-F01",388,129,12,14],["3628SW02-F02",438,129,12,14],["3628EDP01B",258,325,12,14],["3628SW02-F03",306,325,12,14],["3628SW02-F04",348,325,12,14],["3628SW02-F05",388,325,12,14],["3628PC02B",438,325,12,14],["3628SW02-F06",545,129,12,14],["3628SW02-F16",568,325,12,14],["3628SW02-F15",522,325,12,14],["3628SW02-F09",634,129,12,14],["3628SW02-F17",657,325,12,14],["3628SW02-F10",680,129,12,14],["3628SW02-F11",751,129,12,14],["3628SW02-F18",774,325,12,14],["3628SW02-F12",797,129,12,14],["3628SW02-F14",1030,130,12,14],["3628SW02-F13",894,129,12,14],["3628SW02-F20",917,325,12,14],["3628SW02-F19",871,325,12,14],["3628SW02-F26",1096,129,12,14],["3628SW02-F07",1252,129,12,14],["3628SW02-F23",1229,325,12,14],["3628SW02-F24",1206,325,12,14],["3628SW02-F08",1490,129,12,14],["3628SW02-F22",1557,325,12,14],["3628SW02-F28",522,392,12,14],["3628SW02-F208",545,392,12,14],["3628SW02-F209",568,392,12,14],["3628SW02-F210",522,431,12,14],["3628SW02-F211",568,431,12,14],["3628SW02-F212",545,441,12,14],["3628SW02-F214",545,456,12,14],["3628SW02-F215",534,469,12,14],["3628SW02-F216",557,469,12,14],["3628SW02-G400",513,408,12,14],["3628SW02-F35",634,392,12,14],["3628SW02-F218",657,392,12,14],["3628SW02-F219",680,392,12,14],["3628SW02-F220",634,431,12,14],["3628SW02-F221",680,431,12,14],["3628SW02-F222",657,441,12,14],["3628SW02-F224",657,456,12,14],["3628SW02-F225",645,469,12,14],["3628SW02-F226",668,469,12,14],["3628SW02-G401",625,408,12,14],["3628SW02-F42",751,392,12,14],["3628SW02-F228",774,392,12,14],["3628SW02-F229",797,392,12,14],["3628SW02-F230",751,431,12,14],["3628SW02-F231",797,431,12,14],["3628SW02-F232",774,441,12,14],["3628SW02-F234",774,456,12,14],["3628SW02-F235",762,469,12,14],["3628SW02-F236",785,469,12,14],["3628SW02-G402",742,408,12,14],["3628SW02-F49",871,392,12,14],["3628SW02-F238",894,392,12,14],["3628SW02-F239",917,392,12,14],["3628SW02-F240",871,431,12,14],["3628SW02-F241",917,431,12,14],["3628SW02-F242",894,441,12,14],["3628SW02-F244",894,456,12,14],["3628SW02-F245",882,469,12,14],["3628SW02-F246",905,469,12,14],["3628SW02-G403",862,408,12,14],["3628SW02-F248",1030,188,12,14],["3628SW02-F249",984,217,12,14],["3628SW02-F250",1030,226,12,14],["3628SW02-F251",1007,236,12,14],["3628SW02-F253",1007,252,12,14],["3628SW02-F254",996,264,12,14],["3628SW02-F255",1019,264,12,14],["3628SW02-F258",1003,217,12,14],["3628SW02-F62",1096,392,12,14],["3628SW02-F259",1119,392,12,14],["3628SW02-F260",1142,392,12,14],["3628SW02-F261",1096,431,12,14],["3628SW02-F262",1142,431,12,14],["3628SW02-F263",1119,441,12,14],["3628SW02-F265",1119,456,12,14],["3628SW02-F266",1108,469,12,14],["3628SW02-F267",1131,469,12,14],["3628SW02-G404",1087,408,12,14],["3628SW02-F69",1206,392,12,14],["3628SW02-F269",1229,392,12,14],["3628SW02-F270",1252,392,12,14],["3628SW02-F271",1206,431,12,14],["3628SW02-F272",1252,431,12,14],["3628SW02-F273",1229,441,12,14],["3628SW02-F275",1229,456,12,14],["3628SW02-F276",1218,469,12,14],["3628SW02-F277",1241,469,12,14],["3628SW02-G405",1198,408,12,14],["3628SW02-F105",1490,398,12,14],["3628SW02-F106",1557,398,12,14],["3628SW02-F107",1518,421,12,14],["3628SW02-F108",1470,430,12,14],["3628SW02-F110",1534,430,12,14],["3628SW02-F109",1499,430,12,14],["3628SW02-F111",1563,430,12,14],["3628SW02-F82",1702,129,12,14],["3628SW02-F83",1769,325,12,14],["3628SW02-F112",1702,398,12,14],["3628SW02-F113",1769,398,12,14],["3628SW02-F114",1730,421,12,14],["3628SW02-F115",1682,430,12,14],["3628SW02-F117",1746,430,12,14],["3628SW02-F116",1711,430,12,14],["3628SW02-F118",1775,430,12,14],["3628SW02-F287",1028,392,12,14],["3628SW02-F288",982,422,12,14],["3628SW02-F289",1028,431,12,14],["3628SW02-F290",1005,441,12,14],["3628SW02-F292",1005,456,12,14],["3628SW02-F293",994,469,12,14],["3628SW02-F294",1017,469,12,14],["3628SW02-F297",1001,422,12,14],["3628SW02-F96",1365,325,12,14],["3628SW02-F298",1365,392,12,14],["3628SW02-F299",1319,422,12,14],["3628SW02-F300",1365,431,12,14],["3628SW02-F301",1342,441,12,14],["3628SW02-F303",1342,456,12,14],["3628SW02-F304",1331,469,12,14],["3628SW02-F305",1354,469,12,14],["3628SW02-F308",1338,422,12,14],["3628SW02-F103",1348,129,12,14],["3628SW02-F309",1348,392,12,14],["3628SW02-F310",1348,431,12,14]];
+  RELAYS.forEach(function(r){
+    var g=document.createElementNS('http://www.w3.org/2000/svg','a');
+    g.setAttribute('href','GSP6 Diagnostics.dc.html?relay='+encodeURIComponent(r[0]));
+    g.style.cursor='pointer';
+    g.addEventListener('click',function(e){ e.preventDefault(); e.stopPropagation(); if(!moved) openRelay(r[0]); });
+    var rc=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    rc.setAttribute('x',r[1]);rc.setAttribute('y',r[2]);rc.setAttribute('width',r[3]);rc.setAttribute('height',r[4]);
+    rc.setAttribute('rx','4');rc.setAttribute('fill','rgba(37,99,235,0)');rc.setAttribute('stroke','none');
+    rc.onmouseenter=function(){rc.setAttribute('fill','rgba(37,99,235,.28)');rc.setAttribute('stroke','#2563eb');rc.setAttribute('stroke-width','1.6');};
+    rc.onmouseleave=function(){rc.setAttribute('fill','rgba(37,99,235,0)');rc.setAttribute('stroke','none');};
+    var ti=document.createElementNS('http://www.w3.org/2000/svg','title'); ti.textContent='เปิด relay '+r[0];
+    g.appendChild(rc); g.appendChild(ti); ov.appendChild(g);
+  });
+  function apply(){ wrap.style.transform='translate('+tx+'px,'+ty+'px) scale('+scale+')'; }
+  function fit(){
+    var r=stage.getBoundingClientRect();
+    if(!natW) return;
+    var s=Math.min(r.width/natW, r.height/natH)*0.94;
+    scale=s; tx=(r.width-natW*s)/2; ty=(r.height-natH*s)/2; apply();
+  }
+  img.onload=function(){ natW=img.naturalWidth; natH=img.naturalHeight; fit(); };
+  if(img.complete && img.naturalWidth){ natW=img.naturalWidth; natH=img.naturalHeight; fit(); }
+  window.addEventListener('resize', fit);
+  function zoomAt(cx,cy,factor){
+    var ns=Math.max(min,Math.min(max,scale*factor));
+    var k=ns/scale; tx=cx-(cx-tx)*k; ty=cy-(cy-ty)*k; scale=ns; apply();
+  }
+  stage.addEventListener('wheel',function(e){ e.preventDefault();
+    var r=stage.getBoundingClientRect();
+    zoomAt(e.clientX-r.left, e.clientY-r.top, e.deltaY<0?1.12:0.893);
+  },{passive:false});
+  document.getElementById('zin').onclick=function(){ var r=stage.getBoundingClientRect(); zoomAt(r.width/2,r.height/2,1.25); };
+  document.getElementById('zout').onclick=function(){ var r=stage.getBoundingClientRect(); zoomAt(r.width/2,r.height/2,0.8); };
+  document.getElementById('zfit').onclick=fit;
+  var drag=false,px=0,py=0,moved=false;
+  stage.addEventListener('mousedown',function(e){ drag=true;moved=false;px=e.clientX;py=e.clientY;stage.style.cursor='grabbing'; });
+  window.addEventListener('mousemove',function(e){ if(!drag)return; if(Math.abs(e.clientX-px)+Math.abs(e.clientY-py)>2)moved=true; tx+=e.clientX-px; ty+=e.clientY-py; px=e.clientX; py=e.clientY; apply(); });
+  window.addEventListener('mouseup',function(){ drag=false;stage.style.cursor='grab'; });
+  ov.addEventListener('click',function(e){ if(moved){ e.preventDefault(); e.stopPropagation(); } },true);
+
+  // ---- Relay popup: embed the real Diagnostics popup (identical UI) ----
+  var modal=document.getElementById('relayModal'), card=document.getElementById('relayCard');
+  var pf=null, pfReady=false, pendingId=null;
+  // preload the Diagnostics popup iframe once, hidden, so clicks are instant
+  function initFrame(){
+    pf=document.createElement('iframe');
+    pf.src='GSP6 Diagnostics.dc.html?popupOnly=1';
+    pf.style.cssText='position:fixed;inset:0;width:100%;height:100%;border:0;background:transparent;';
+    pf.setAttribute('allowtransparency','true');
+    card.appendChild(pf);
+  }
+  window.addEventListener('message',function(e){
+    if(e.data==='closeRelayPopup') modal.style.display='none';
+    if(e.data==='popupReady'){ pfReady=true; if(pendingId!=null){ pf.contentWindow.postMessage({type:'openRelay',id:pendingId},'*'); pendingId=null; } }
+  });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') modal.style.display='none'; });
+  function openRelay(id){
+    modal.style.display='flex';
+    if(!pf) initFrame();
+    if(pfReady){ pf.contentWindow.postMessage({type:'openRelay',id:id},'*'); }
+    else { pendingId=id; }
+  }
+  // ---- ① 380V FEEDER hexagon → table panel ----
+  var FEEDERS=[["3601-1MOV106","2.2",""],["3601-1MOV107","2.2",""],["3601-1MOV084","4.4",""],["3601-1MOV085","4.4",""],["3601-1MOV100","5.1",""],["3601-1MOV101","5.1",""],["3601-1MOV102","3.4",""],["3601-1MOV103","3.4",""],["3601-1MOV104","14",""],["3601-1MOV105","14",""],["3601-1MOV110","2.1",""],["3601-1MOV111","2.1",""],["3601-1MOV108","4.2",""],["3601-1MOV109","4.2",""],["3603MOV01","14",""],["3603MOV03","7.6",""],["3606MOV001","15",""],["3606MOV003","15",""],["3608F001YM02","3.0",""],["3608F002AYM01","3.7",""],["3608F002BH01","60",""],["3608F002BYM02","3",""],["3608MOV01","7.6",""],["3608MOV03","7.8",""],["3608MOV05","7.6",""],["3608MOV07","7.6",""],["3628WR41","",""],["3628WR43","",""],["3628WR45","",""],["3628WR47","",""],["3628WR49","",""],["3628WR51","",""],["SPARE","","30"],["SPARE","","30"],["SPARE","","30"],["SPARE","","30"],["SPARE","","30"],["SPARE","","30"],["SPARE","","30"],["SPARE","","30"],["SPARE","","30"],["SPARE","","30"]];
+  var fModal=document.getElementById('feederModal'), fPanel=document.getElementById('feederPanel');
+  function esc(s){return String(s).replace(/[&<>]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+  function buildFeederPanel(){
+    var rows=FEEDERS.map(function(f,i){
+      var spare=/SPARE/i.test(f[0]);
+      var bg=spare?'#eef1f5':(i%2?'#f7f9fc':'#fff');
+      return '<tr style="background:'+bg+';">'+
+        '<td style="padding:6px 12px;border-bottom:1px solid #e3e8ef;font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:600;'+(spare?'color:#8a94a3;font-style:italic;':'color:#11202f;')+'">'+(spare?esc(f[0]):'<span class="fRelay" data-id="'+esc(f[0])+'" style="cursor:pointer;color:#0b56a4;text-decoration:underline;text-underline-offset:2px;">'+esc(f[0])+'</span>')+'</td>'+
+        '<td style="padding:6px 8px;border-bottom:1px solid #e3e8ef;border-left:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;color:#11202f;">'+esc(f[1])+'</td>'+
+        '<td style="padding:6px 8px;border-bottom:1px solid #e3e8ef;border-left:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:600;color:#0b56a4;background:'+(f[2]?'rgba(11,86,164,.06)':'transparent')+';">'+esc(f[2])+'</td>'+
+      '</tr>';
+    }).join('');
+    fPanel.innerHTML=
+      '<div style="background:linear-gradient(180deg,#0b4f95,#003d7c);color:#fff;padding:16px 20px;display:flex;align-items:center;gap:13px;flex-shrink:0;">'+
+        '<div style="width:34px;height:34px;flex-shrink:0;position:relative;">'+
+          '<svg width="34" height="34" viewBox="0 0 34 34"><polygon points="9,3 25,3 33,17 25,31 9,31 1,17" fill="rgba(255,255,255,.14)" stroke="#cfe0f5" stroke-width="1.5"/><text x="17" y="22" text-anchor="middle" font-family="Space Grotesk,sans-serif" font-size="15" font-weight="700" fill="#fff">1</text></svg>'+
+        '</div>'+
+        '<div style="flex:1;min-width:0;"><div style="font-family:\'Space Grotesk\',sans-serif;font-size:18px;font-weight:700;letter-spacing:-.01em;">380V FEEDERS</div>'+
+        '<div style="font-size:11.5px;color:#bcd4ef;font-weight:500;margin-top:1px;">3628SW02A-B · '+FEEDERS.length+' items</div></div>'+
+        '<button id="fClose" style="width:30px;height:30px;border:none;border-radius:8px;background:rgba(255,255,255,.16);color:#fff;font-size:17px;cursor:pointer;flex-shrink:0;">&times;</button>'+
+      '</div>'+
+      '<div style="flex:1;overflow-y:auto;padding:14px;">'+
+        '<div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 3px 14px rgba(10,30,60,.08);border:1px solid #e3e8ef;">'+
+          '<table style="width:100%;border-collapse:collapse;">'+
+            '<thead><tr style="background:#11202f;color:#fff;">'+
+              '<th style="padding:9px 12px;text-align:left;font-family:\'Space Grotesk\',sans-serif;font-size:11.5px;letter-spacing:.03em;">MOTOR ITEM NO.</th>'+
+              '<th colspan="2" style="padding:9px 8px;text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:11.5px;letter-spacing:.03em;border-left:1px solid #2c3e52;">RATING (kW)</th>'+
+            '</tr><tr style="background:#1c3350;color:#cfe0f5;">'+
+              '<th style="padding:4px 12px;"></th>'+
+              '<th style="padding:4px 8px;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;border-left:1px solid #2c3e52;">N</th>'+
+              '<th style="padding:4px 8px;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;border-left:1px solid #2c3e52;">S</th>'+
+            '</tr></thead><tbody>'+rows+'</tbody>'+
+          '</table>'+
+        '</div>'+
+      '</div>';
+    document.getElementById('fClose').onclick=function(){ fModal.style.display='none'; };
+    Array.prototype.forEach.call(fPanel.querySelectorAll('.fRelay'),function(el){
+      el.addEventListener('click',function(){ openRelay(el.getAttribute('data-id')); });
+    });
+  }
+  fModal.addEventListener('click',function(e){ if(e.target===fModal) fModal.style.display='none'; });
+  (function(){
+    var g=document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.style.cursor='pointer';
+    var rc=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    rc.setAttribute('x',423);rc.setAttribute('y',192);rc.setAttribute('width',48);rc.setAttribute('height',11);
+    rc.setAttribute('rx','3');rc.setAttribute('fill','rgba(37,99,235,0)');rc.setAttribute('stroke','none');
+    rc.onmouseenter=function(){rc.setAttribute('fill','rgba(37,99,235,.28)');rc.setAttribute('stroke','#2563eb');rc.setAttribute('stroke-width','1.4');};
+    rc.onmouseleave=function(){rc.setAttribute('fill','rgba(37,99,235,0)');rc.setAttribute('stroke','none');};
+    var ti=document.createElementNS('http://www.w3.org/2000/svg','title'); ti.textContent='380V FEEDERS';
+    g.addEventListener('click',function(e){ e.preventDefault(); e.stopPropagation(); if(!moved){ buildFeederPanel(); fModal.style.display='block'; } });
+    g.appendChild(rc); g.appendChild(ti); ov.appendChild(g);
+  })();
+
+  initFrame();
+
+  // ---- ② 380V MOTORS hexagon → table panel ----
+  var MOTORS=[["3606C001AH01","6.5",""],["3606C001BH01","6.5",""],["3606X001H01","5",""],["3625X001H01","5",""],["3625X001H05","2",""],["3625X001H07","1",""],["3601-1E002CLS01","0.37",""],["3601-1P002PM01","5.5",""],["3601-1P002RPM01R","","5.5"],["3601-1P007RPM01","0.4",""],["3601-1P007RPM01R","","0.4"],["3601-1PM002CM01","2.2",""],["3601-1PM002CM02","2.2",""],["3601-1PM002RCM01","","2.2"],["3601-1PM002RCM02","","2.2"],["3602C001PM01","11",""],["3603X001PM01","15",""],["3604E003CLS01","0.37",""],["3604P002PM01","0.4",""],["3606C001APM01R","","30"],["3606C001BCM01","0.18",""],["3606C001BPM01","30",""],["3606E001CLS01","0.37",""],["3606X001ACM01","37",""],["3606X001APM01","15",""],["3606X001BCM01R","","37"],["3606X001BPM01","15",""],["3608F001R","","15"],["3608F001CM02","7.5",""],["3608F001CM07","","7.5"],["3608F001CM03R","","7.5"],["3608F001CM04","8.6",""],["3608F001CM05","12",""],["3608F001PM05","0.37",""],["3608F002ACM01","15",""],["3608F002ACM02","7.5",""],["3608F002ACM04R","","8.6"],["3608F002ACM05R","","12"],["3608F002APM05","0.37",""],["3608F002BCM01R","","15"],["3608F002BCM04","8.6",""],["3608F002BCM05","12",""],["3608F002BPM05R","","0.37"],["3615P001RPM","0.25",""],["3615P002PM","0.25",""],["3615PM001R","","22"],["3615PM002","22",""],["3616Y002PM02","1.1",""],["3621PM003","22",""],["3625X001CM01","37",""],["3625X001PM01","15",""],["3625X001PM02","23",""],["SPARE","15",""],["SPARE","5.5",""],["SPARE","0.55",""],["SPARE","7.5",""],["SPARE","","30"],["SPARE","","30"],["SPARE","","30"],["SPARE","","30"],["SPARE","","30"],["SPARE","","30"],["SPARE","","30"],["SPARE","","30"]];
+  var mModal=document.getElementById('motorModal'), mPanel=document.getElementById('motorPanel');
+  function buildMotorPanel(){
+    var rows=MOTORS.map(function(f,i){
+      var spare=/SPARE/i.test(f[0]);
+      var bg=spare?'#eef1f5':(i%2?'#f7f9fc':'#fff');
+      return '<tr style="background:'+bg+';">'+
+        '<td style="padding:6px 12px;border-bottom:1px solid #e3e8ef;font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:600;'+(spare?'color:#8a94a3;font-style:italic;':'color:#11202f;')+'">'+(spare?esc(f[0]):'<span class="mRelay" data-id="'+esc(f[0])+'" style="cursor:pointer;color:#0b56a4;text-decoration:underline;text-underline-offset:2px;">'+esc(f[0])+'</span>')+'</td>'+
+        '<td style="padding:6px 8px;border-bottom:1px solid #e3e8ef;border-left:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;color:#11202f;">'+esc(f[1])+'</td>'+
+        '<td style="padding:6px 8px;border-bottom:1px solid #e3e8ef;border-left:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:600;color:#0b56a4;background:'+(f[2]?'rgba(11,86,164,.06)':'transparent')+';">'+esc(f[2])+'</td>'+
+      '</tr>';
+    }).join('');
+    mPanel.innerHTML=
+      '<div style="background:linear-gradient(180deg,#0b4f95,#003d7c);color:#fff;padding:16px 20px;display:flex;align-items:center;gap:13px;flex-shrink:0;">'+
+        '<div style="width:34px;height:34px;flex-shrink:0;position:relative;">'+
+          '<svg width="34" height="34" viewBox="0 0 34 34"><polygon points="9,3 25,3 33,17 25,31 9,31 1,17" fill="rgba(255,255,255,.14)" stroke="#cfe0f5" stroke-width="1.5"/><text x="17" y="22" text-anchor="middle" font-family="Space Grotesk,sans-serif" font-size="15" font-weight="700" fill="#fff">2</text></svg>'+
+        '</div>'+
+        '<div style="flex:1;min-width:0;"><div style="font-family:\'Space Grotesk\',sans-serif;font-size:18px;font-weight:700;letter-spacing:-.01em;">380V MOTORS</div>'+
+        '<div style="font-size:11.5px;color:#bcd4ef;font-weight:500;margin-top:1px;">3628SW02A-B · '+MOTORS.length+' items</div></div>'+
+        '<button id="mClose" style="width:30px;height:30px;border:none;border-radius:8px;background:rgba(255,255,255,.16);color:#fff;font-size:17px;cursor:pointer;flex-shrink:0;">&times;</button>'+
+      '</div>'+
+      '<div style="flex:1;overflow-y:auto;padding:14px;">'+
+        '<div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 3px 14px rgba(10,30,60,.08);border:1px solid #e3e8ef;">'+
+          '<table style="width:100%;border-collapse:collapse;">'+
+            '<thead><tr style="background:#11202f;color:#fff;">'+
+              '<th style="padding:9px 12px;text-align:left;font-family:\'Space Grotesk\',sans-serif;font-size:11.5px;letter-spacing:.03em;">MOTOR ITEM NO.</th>'+
+              '<th colspan="2" style="padding:9px 8px;text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:11.5px;letter-spacing:.03em;border-left:1px solid #2c3e52;">RATING (kW)</th>'+
+            '</tr><tr style="background:#1c3350;color:#cfe0f5;">'+
+              '<th style="padding:4px 12px;"></th>'+
+              '<th style="padding:4px 8px;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;border-left:1px solid #2c3e52;">N</th>'+
+              '<th style="padding:4px 8px;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;border-left:1px solid #2c3e52;">S</th>'+
+            '</tr></thead><tbody>'+rows+'</tbody>'+
+          '</table>'+
+        '</div>'+
+      '</div>';
+    document.getElementById('mClose').onclick=function(){ mModal.style.display='none'; };
+    Array.prototype.forEach.call(mPanel.querySelectorAll('.mRelay'),function(el){
+      el.addEventListener('click',function(){ openRelay(el.getAttribute('data-id')); });
+    });
+  }
+  mModal.addEventListener('click',function(e){ if(e.target===mModal) mModal.style.display='none'; });
+  (function(){
+    var g=document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.style.cursor='pointer';
+    var rc=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    rc.setAttribute('x',387);rc.setAttribute('y',191.5);rc.setAttribute('width',14);rc.setAttribute('height',14);
+    rc.setAttribute('rx','7');rc.setAttribute('fill','rgba(37,99,235,0)');rc.setAttribute('stroke','none');
+    rc.onmouseenter=function(){rc.setAttribute('fill','rgba(37,99,235,.28)');rc.setAttribute('stroke','#2563eb');rc.setAttribute('stroke-width','1.4');};
+    rc.onmouseleave=function(){rc.setAttribute('fill','rgba(37,99,235,0)');rc.setAttribute('stroke','none');};
+    var ti=document.createElementNS('http://www.w3.org/2000/svg','title'); ti.textContent='380V MOTORS';
+    g.addEventListener('click',function(e){ e.preventDefault(); e.stopPropagation(); if(!moved){ buildMotorPanel(); mModal.style.display='block'; } });
+    g.appendChild(rc); g.appendChild(ti); ov.appendChild(g);
+  })();
+
+  // ---- ③ 380V MOTORS > 75kW hexagon → table panel ----
+  var MOTORS3=[["3608F001CM06R","150",""],["SPARE","","150"]];
+  var m3Modal=document.getElementById('motor3Modal'), m3Panel=document.getElementById('motor3Panel');
+  function buildMotor3Panel(){
+    var rows=MOTORS3.map(function(f,i){
+      var spare=/SPARE/i.test(f[0]);
+      var bg=spare?'#eef1f5':(i%2?'#f7f9fc':'#fff');
+      return '<tr style="background:'+bg+';">'+
+        '<td style="padding:6px 12px;border-bottom:1px solid #e3e8ef;font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:600;'+(spare?'color:#8a94a3;font-style:italic;':'color:#11202f;')+'">'+(spare?esc(f[0]):'<span class="m3Relay" data-id="'+esc(f[0])+'" style="cursor:pointer;color:#0b56a4;text-decoration:underline;text-underline-offset:2px;">'+esc(f[0])+'</span>')+'</td>'+
+        '<td style="padding:6px 8px;border-bottom:1px solid #e3e8ef;border-left:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;color:#11202f;">'+esc(f[1])+'</td>'+
+        '<td style="padding:6px 8px;border-bottom:1px solid #e3e8ef;border-left:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:600;color:#0b56a4;background:'+(f[2]?'rgba(11,86,164,.06)':'transparent')+';">'+esc(f[2])+'</td>'+
+      '</tr>';
+    }).join('');
+    m3Panel.innerHTML=
+      '<div style="background:linear-gradient(180deg,#0b4f95,#003d7c);color:#fff;padding:16px 20px;display:flex;align-items:center;gap:13px;flex-shrink:0;">'+
+        '<div style="width:34px;height:34px;flex-shrink:0;position:relative;">'+
+          '<svg width="34" height="34" viewBox="0 0 34 34"><polygon points="9,3 25,3 33,17 25,31 9,31 1,17" fill="rgba(255,255,255,.14)" stroke="#cfe0f5" stroke-width="1.5"/><text x="17" y="22" text-anchor="middle" font-family="Space Grotesk,sans-serif" font-size="15" font-weight="700" fill="#fff">3</text></svg>'+
+        '</div>'+
+        '<div style="flex:1;min-width:0;"><div style="font-family:\'Space Grotesk\',sans-serif;font-size:18px;font-weight:700;letter-spacing:-.01em;">380V MOTORS &gt;75kW</div>'+
+        '<div style="font-size:11.5px;color:#bcd4ef;font-weight:500;margin-top:1px;">3628SW02A-B · '+MOTORS3.length+' items</div></div>'+
+        '<button id="m3Close" style="width:30px;height:30px;border:none;border-radius:8px;background:rgba(255,255,255,.16);color:#fff;font-size:17px;cursor:pointer;flex-shrink:0;">&times;</button>'+
+      '</div>'+
+      '<div style="flex:1;overflow-y:auto;padding:14px;">'+
+        '<div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 3px 14px rgba(10,30,60,.08);border:1px solid #e3e8ef;">'+
+          '<table style="width:100%;border-collapse:collapse;">'+
+            '<thead><tr style="background:#11202f;color:#fff;">'+
+              '<th style="padding:9px 12px;text-align:left;font-family:\'Space Grotesk\',sans-serif;font-size:11.5px;letter-spacing:.03em;">MOTOR ITEM NO.</th>'+
+              '<th colspan="2" style="padding:9px 8px;text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:11.5px;letter-spacing:.03em;border-left:1px solid #2c3e52;">RATING (kW)</th>'+
+            '</tr><tr style="background:#1c3350;color:#cfe0f5;">'+
+              '<th style="padding:4px 12px;"></th>'+
+              '<th style="padding:4px 8px;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;border-left:1px solid #2c3e52;">N</th>'+
+              '<th style="padding:4px 8px;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;border-left:1px solid #2c3e52;">S</th>'+
+            '</tr></thead><tbody>'+rows+'</tbody>'+
+          '</table>'+
+        '</div>'+
+      '</div>';
+    document.getElementById('m3Close').onclick=function(){ m3Modal.style.display='none'; };
+    Array.prototype.forEach.call(m3Panel.querySelectorAll('.m3Relay'),function(el){
+      el.addEventListener('click',function(){ openRelay(el.getAttribute('data-id')); });
+    });
+  }
+  m3Modal.addEventListener('click',function(e){ if(e.target===m3Modal) m3Modal.style.display='none'; });
+  (function(){
+    var g=document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.style.cursor='pointer';
+    var rc=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    rc.setAttribute('x',347);rc.setAttribute('y',191.5);rc.setAttribute('width',14);rc.setAttribute('height',14);
+    rc.setAttribute('rx','7');rc.setAttribute('fill','rgba(37,99,235,0)');rc.setAttribute('stroke','none');
+    rc.onmouseenter=function(){rc.setAttribute('fill','rgba(37,99,235,.28)');rc.setAttribute('stroke','#2563eb');rc.setAttribute('stroke-width','1.4');};
+    rc.onmouseleave=function(){rc.setAttribute('fill','rgba(37,99,235,0)');rc.setAttribute('stroke','none');};
+    var ti=document.createElementNS('http://www.w3.org/2000/svg','title'); ti.textContent='380V MOTORS >75kW';
+    g.addEventListener('click',function(e){ e.preventDefault(); e.stopPropagation(); if(!moved){ buildMotor3Panel(); m3Modal.style.display='block'; } });
+    g.appendChild(rc); g.appendChild(ti); ov.appendChild(g);
+  })();
+
+  // ---- ④ 380V MOTORS > 75kW (lower board) → table panel ----
+  var MOTORS4=[["3608F001CM06","150",""],["SPARE","","150"]];
+  var m4Modal=document.createElement('div'); m4Modal.style.cssText='display:none;position:fixed;inset:0;z-index:90;background:rgba(8,20,38,.35);';
+  var m4Panel=document.createElement('div'); m4Panel.style.cssText='position:absolute;top:0;right:0;height:100%;width:420px;max-width:92vw;background:#f3f6fa;box-shadow:-8px 0 30px rgba(10,30,60,.22);display:flex;flex-direction:column;';
+  m4Modal.appendChild(m4Panel); document.body.appendChild(m4Modal);
+  function buildMotor4Panel(){
+    var rows=MOTORS4.map(function(f,i){
+      var spare=/SPARE/i.test(f[0]);
+      var bg=spare?'#eef1f5':(i%2?'#f7f9fc':'#fff');
+      return '<tr style="background:'+bg+';">'+
+        '<td style="padding:6px 12px;border-bottom:1px solid #e3e8ef;font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:600;'+(spare?'color:#8a94a3;font-style:italic;':'color:#11202f;')+'">'+(spare?esc(f[0]):'<span class="m4Relay" data-id="'+esc(f[0])+'" style="cursor:pointer;color:#0b56a4;text-decoration:underline;text-underline-offset:2px;">'+esc(f[0])+'</span>')+'</td>'+
+        '<td style="padding:6px 8px;border-bottom:1px solid #e3e8ef;border-left:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;color:#11202f;">'+esc(f[1])+'</td>'+
+        '<td style="padding:6px 8px;border-bottom:1px solid #e3e8ef;border-left:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:600;color:#0b56a4;background:'+(f[2]?'rgba(11,86,164,.06)':'transparent')+';">'+esc(f[2])+'</td>'+
+      '</tr>';
+    }).join('');
+    m4Panel.innerHTML=
+      '<div style="background:linear-gradient(180deg,#0b4f95,#003d7c);color:#fff;padding:16px 20px;display:flex;align-items:center;gap:13px;flex-shrink:0;">'+
+        '<div style="width:34px;height:34px;flex-shrink:0;position:relative;">'+
+          '<svg width="34" height="34" viewBox="0 0 34 34"><polygon points="9,3 25,3 33,17 25,31 9,31 1,17" fill="rgba(255,255,255,.14)" stroke="#cfe0f5" stroke-width="1.5"/><text x="17" y="22" text-anchor="middle" font-family="Space Grotesk,sans-serif" font-size="15" font-weight="700" fill="#fff">4</text></svg>'+
+        '</div>'+
+        '<div style="flex:1;min-width:0;"><div style="font-family:\'Space Grotesk\',sans-serif;font-size:18px;font-weight:700;letter-spacing:-.01em;">380V MOTORS &gt;75kW</div>'+
+        '<div style="font-size:11.5px;color:#bcd4ef;font-weight:500;margin-top:1px;">3628SW02A-B · '+MOTORS4.length+' items</div></div>'+
+        '<button id="m4Close" style="width:30px;height:30px;border:none;border-radius:8px;background:rgba(255,255,255,.16);color:#fff;font-size:17px;cursor:pointer;flex-shrink:0;">&times;</button>'+
+      '</div>'+
+      '<div style="flex:1;overflow-y:auto;padding:14px;">'+
+        '<div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 3px 14px rgba(10,30,60,.08);border:1px solid #e3e8ef;">'+
+          '<table style="width:100%;border-collapse:collapse;">'+
+            '<thead><tr style="background:#11202f;color:#fff;">'+
+              '<th style="padding:9px 12px;text-align:left;font-family:\'Space Grotesk\',sans-serif;font-size:11.5px;letter-spacing:.03em;">MOTOR ITEM NO.</th>'+
+              '<th colspan="2" style="padding:9px 8px;text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:11.5px;letter-spacing:.03em;border-left:1px solid #2c3e52;">RATING (kW)</th>'+
+            '</tr><tr style="background:#1c3350;color:#cfe0f5;">'+
+              '<th style="padding:4px 12px;"></th>'+
+              '<th style="padding:4px 8px;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;border-left:1px solid #2c3e52;">N</th>'+
+              '<th style="padding:4px 8px;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;border-left:1px solid #2c3e52;">S</th>'+
+            '</tr></thead><tbody>'+rows+'</tbody>'+
+          '</table>'+
+        '</div>'+
+      '</div>';
+    document.getElementById('m4Close').onclick=function(){ m4Modal.style.display='none'; };
+    Array.prototype.forEach.call(m4Panel.querySelectorAll('.m4Relay'),function(el){
+      el.addEventListener('click',function(){ openRelay(el.getAttribute('data-id')); });
+    });
+  }
+  m4Modal.addEventListener('click',function(e){ if(e.target===m4Modal) m4Modal.style.display='none'; });
+  (function(){
+    var g=document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.style.cursor='pointer';
+    var rc=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    rc.setAttribute('x',305);rc.setAttribute('y',387);rc.setAttribute('width',14);rc.setAttribute('height',14);
+    rc.setAttribute('rx','7');rc.setAttribute('fill','rgba(37,99,235,0)');rc.setAttribute('stroke','none');
+    rc.onmouseenter=function(){rc.setAttribute('fill','rgba(37,99,235,.28)');rc.setAttribute('stroke','#2563eb');rc.setAttribute('stroke-width','1.4');};
+    rc.onmouseleave=function(){rc.setAttribute('fill','rgba(37,99,235,0)');rc.setAttribute('stroke','none');};
+    var ti=document.createElementNS('http://www.w3.org/2000/svg','title'); ti.textContent='380V MOTORS >75kW (4)';
+    g.addEventListener('click',function(e){ e.preventDefault(); e.stopPropagation(); if(!moved){ buildMotor4Panel(); m4Modal.style.display='block'; } });
+    g.appendChild(rc); g.appendChild(ti); ov.appendChild(g);
+  })();
+
+  // ---- ⑤ 380V MOTORS (lower board) → table panel ----
+  var MOTORS5=[["3606X001AH01","5",""],["SPARE","15",""],["3625X001H02","15",""],["3625X001H06","1",""],["3601-2E002CLS01","0.37",""],["3601-2P002PM01","5.5",""],["3601-2P002RPM01R","","5.5"],["3601-2PM002CM01","2.2",""],["3601-2PM002CM02","2.2",""],["3601-2PM002RCM01","","2.2"],["3601-2PM002RCM02","","2.2"],["3602C001PM01R","11",""],["3603X001PM01R","15",""],["3603X001PM02","4",""],["3604P002RPM01R","","0.4"],["3606C001ACM01","0.18",""],["3606C001APM01","30",""],["3606C001BPM01R","","30"],["3606X001ACM01R","","37"],["3606X001APM01R","15",""],["3606X001BCM01","37",""],["3606X001BPM01R","","15"],["3607C001APM02","0.55",""],["3607C001CM02","0.75",""],["3607C001PM02R","","75"],["3607E001CLS01","0.37",""],["3608F001CM01","15",""],["3608F001CM03","7.5",""],["3608F001CM04R","","8.6"],["3608F001CM05R","","12"],["3608F001PM05R","","0.37"],["3608F002ACM01R","","15"],["3608F002ACM04","8.6",""],["3608F002ACM05","12",""],["3608F002APM05R","","0.37"],["3608F002BCM01","15",""],["3608F002BCM02","7.5",""],["3608F002BCM04R","","8.6"],["3608F002BCM05R","","12"],["3608F002BPM05","0.37",""],["3615P001PM","0.25",""],["3615P002RPM","0.25",""],["3615PM001","22",""],["3615PM002R","","22"],["3616Y002RPM02","1.1",""],["3618E001CLS01","0.37",""],["3621PM003R","","22"],["3625X001CM01R","","37"],["3625X001CM02","3",""],["3625X001PM01R","","15"],["SPARE","37",""],["SPARE","5.5",""],["SPARE","37",""],["SPARE","7.5",""],["SPARE","7.5",""],["SPARE","","15"],["SPARE","","15"],["SPARE","","40"],["SPARE","","40"],["SPARE","","40"],["SPARE","","75"],["SPARE","","75"],["SPARE","","200"]];
+  var m5Modal=document.createElement('div'); m5Modal.style.cssText='display:none;position:fixed;inset:0;z-index:90;background:rgba(8,20,38,.35);';
+  var m5Panel=document.createElement('div'); m5Panel.style.cssText='position:absolute;top:0;right:0;height:100%;width:420px;max-width:92vw;background:#f3f6fa;box-shadow:-8px 0 30px rgba(10,30,60,.22);display:flex;flex-direction:column;';
+  m5Modal.appendChild(m5Panel); document.body.appendChild(m5Modal);
+  function buildMotor5Panel(){
+    var rows=MOTORS5.map(function(f,i){
+      var spare=/SPARE/i.test(f[0]);
+      var bg=spare?'#eef1f5':(i%2?'#f7f9fc':'#fff');
+      return '<tr style="background:'+bg+';">'+
+        '<td style="padding:6px 12px;border-bottom:1px solid #e3e8ef;font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:600;'+(spare?'color:#8a94a3;font-style:italic;':'color:#11202f;')+'">'+(spare?esc(f[0]):'<span class="m5Relay" data-id="'+esc(f[0])+'" style="cursor:pointer;color:#0b56a4;text-decoration:underline;text-underline-offset:2px;">'+esc(f[0])+'</span>')+'</td>'+
+        '<td style="padding:6px 8px;border-bottom:1px solid #e3e8ef;border-left:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;color:#11202f;">'+esc(f[1])+'</td>'+
+        '<td style="padding:6px 8px;border-bottom:1px solid #e3e8ef;border-left:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:600;color:#0b56a4;background:'+(f[2]?'rgba(11,86,164,.06)':'transparent')+';">'+esc(f[2])+'</td>'+
+      '</tr>';
+    }).join('');
+    m5Panel.innerHTML=
+      '<div style="background:linear-gradient(180deg,#0b4f95,#003d7c);color:#fff;padding:16px 20px;display:flex;align-items:center;gap:13px;flex-shrink:0;">'+
+        '<div style="width:34px;height:34px;flex-shrink:0;position:relative;">'+
+          '<svg width="34" height="34" viewBox="0 0 34 34"><polygon points="9,3 25,3 33,17 25,31 9,31 1,17" fill="rgba(255,255,255,.14)" stroke="#cfe0f5" stroke-width="1.5"/><text x="17" y="22" text-anchor="middle" font-family="Space Grotesk,sans-serif" font-size="15" font-weight="700" fill="#fff">5</text></svg>'+
+        '</div>'+
+        '<div style="flex:1;min-width:0;"><div style="font-family:\'Space Grotesk\',sans-serif;font-size:18px;font-weight:700;letter-spacing:-.01em;">380V MOTORS</div>'+
+        '<div style="font-size:11.5px;color:#bcd4ef;font-weight:500;margin-top:1px;">3628SW02A-B · '+MOTORS5.length+' items</div></div>'+
+        '<button id="m5Close" style="width:30px;height:30px;border:none;border-radius:8px;background:rgba(255,255,255,.16);color:#fff;font-size:17px;cursor:pointer;flex-shrink:0;">&times;</button>'+
+      '</div>'+
+      '<div style="flex:1;overflow-y:auto;padding:14px;">'+
+        '<div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 3px 14px rgba(10,30,60,.08);border:1px solid #e3e8ef;">'+
+          '<table style="width:100%;border-collapse:collapse;">'+
+            '<thead><tr style="background:#11202f;color:#fff;">'+
+              '<th style="padding:9px 12px;text-align:left;font-family:\'Space Grotesk\',sans-serif;font-size:11.5px;letter-spacing:.03em;">MOTOR ITEM NO.</th>'+
+              '<th colspan="2" style="padding:9px 8px;text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:11.5px;letter-spacing:.03em;border-left:1px solid #2c3e52;">RATING (kW)</th>'+
+            '</tr><tr style="background:#1c3350;color:#cfe0f5;">'+
+              '<th style="padding:4px 12px;"></th>'+
+              '<th style="padding:4px 8px;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;border-left:1px solid #2c3e52;">N</th>'+
+              '<th style="padding:4px 8px;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;border-left:1px solid #2c3e52;">S</th>'+
+            '</tr></thead><tbody>'+rows+'</tbody>'+
+          '</table>'+
+        '</div>'+
+      '</div>';
+    document.getElementById('m5Close').onclick=function(){ m5Modal.style.display='none'; };
+    Array.prototype.forEach.call(m5Panel.querySelectorAll('.m5Relay'),function(el){
+      el.addEventListener('click',function(){ openRelay(el.getAttribute('data-id')); });
+    });
+  }
+  m5Modal.addEventListener('click',function(e){ if(e.target===m5Modal) m5Modal.style.display='none'; });
+  (function(){
+    var g=document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.style.cursor='pointer';
+    var rc=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    rc.setAttribute('x',347);rc.setAttribute('y',387);rc.setAttribute('width',14);rc.setAttribute('height',14);
+    rc.setAttribute('rx','7');rc.setAttribute('fill','rgba(37,99,235,0)');rc.setAttribute('stroke','none');
+    rc.onmouseenter=function(){rc.setAttribute('fill','rgba(37,99,235,.28)');rc.setAttribute('stroke','#2563eb');rc.setAttribute('stroke-width','1.4');};
+    rc.onmouseleave=function(){rc.setAttribute('fill','rgba(37,99,235,0)');rc.setAttribute('stroke','none');};
+    var ti=document.createElementNS('http://www.w3.org/2000/svg','title'); ti.textContent='380V MOTORS (5)';
+    g.addEventListener('click',function(e){ e.preventDefault(); e.stopPropagation(); if(!moved){ buildMotor5Panel(); m5Modal.style.display='block'; } });
+    g.appendChild(rc); g.appendChild(ti); ov.appendChild(g);
+  })();
+
+  // ---- ⑥ 380V FEEDERS (lower board) → table panel ----
+  var FEEDERS6=[["3601-2MOV106","2.2",""],["3601-2MOV107","2.2",""],["3601-2MOV064","4.4",""],["3601-2MOV065","4.4",""],["3601-2MOV100","5.1",""],["3601-2MOV101","5.1",""],["3601-2MOV102","3.4",""],["3601-2MOV103","3.4",""],["3601-2MOV104","14",""],["3601-2MOV105","14",""],["3601-2MOV110","2.1",""],["3601-2MOV111","2.1",""],["3601-2MOV108","4.2",""],["3601-2MOV109","4.2",""],["3603C001XM01","1.5",""],["3603MOV02","14",""],["3603MOV04","7.6",""],["3606MOV002","15",""],["3606MOV004","15",""],["3608F001H01","60",""],["3608F001YM01","3.7",""],["3608F002AH01","60",""],["3608F002AYM02","3",""],["3608F002BYM01","3.7",""],["3608MOV02","7.6",""],["3608MOV04","7.6",""],["3608MOV06","7.6",""],["3608MOV08","7.6",""],["3628WR42","",""],["3628WR44","",""],["3628WR46","",""],["3628WR48","",""],["3628WR50","",""],["3628WR52","",""],["SPARE","","30"],["SPARE","","30"],["SPARE","","30"],["SPARE","","30"],["SPARE","","30"],["SPARE","","30"],["SPARE","","30"],["SPARE","","30"],["SPARE","2",""]];
+  var f6Modal=document.createElement('div'); f6Modal.style.cssText='display:none;position:fixed;inset:0;z-index:90;background:rgba(8,20,38,.35);';
+  var f6Panel=document.createElement('div'); f6Panel.style.cssText='position:absolute;top:0;right:0;height:100%;width:420px;max-width:92vw;background:#f3f6fa;box-shadow:-8px 0 30px rgba(10,30,60,.22);display:flex;flex-direction:column;';
+  f6Modal.appendChild(f6Panel); document.body.appendChild(f6Modal);
+  function buildFeeder6Panel(){
+    var rows=FEEDERS6.map(function(f,i){
+      var spare=/SPARE/i.test(f[0]);
+      var bg=spare?'#eef1f5':(i%2?'#f7f9fc':'#fff');
+      return '<tr style="background:'+bg+';">'+
+        '<td style="padding:6px 12px;border-bottom:1px solid #e3e8ef;font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:600;'+(spare?'color:#8a94a3;font-style:italic;':'color:#11202f;')+'">'+(spare?esc(f[0]):'<span class="f6Relay" data-id="'+esc(f[0])+'" style="cursor:pointer;color:#0b56a4;text-decoration:underline;text-underline-offset:2px;">'+esc(f[0])+'</span>')+'</td>'+
+        '<td style="padding:6px 8px;border-bottom:1px solid #e3e8ef;border-left:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;color:#11202f;">'+esc(f[1])+'</td>'+
+        '<td style="padding:6px 8px;border-bottom:1px solid #e3e8ef;border-left:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:600;color:#0b56a4;background:'+(f[2]?'rgba(11,86,164,.06)':'transparent')+';">'+esc(f[2])+'</td>'+
+      '</tr>';
+    }).join('');
+    f6Panel.innerHTML=
+      '<div style="background:linear-gradient(180deg,#0b4f95,#003d7c);color:#fff;padding:16px 20px;display:flex;align-items:center;gap:13px;flex-shrink:0;">'+
+        '<div style="width:34px;height:34px;flex-shrink:0;position:relative;">'+
+          '<svg width="34" height="34" viewBox="0 0 34 34"><polygon points="9,3 25,3 33,17 25,31 9,31 1,17" fill="rgba(255,255,255,.14)" stroke="#cfe0f5" stroke-width="1.5"/><text x="17" y="22" text-anchor="middle" font-family="Space Grotesk,sans-serif" font-size="15" font-weight="700" fill="#fff">6</text></svg>'+
+        '</div>'+
+        '<div style="flex:1;min-width:0;"><div style="font-family:\'Space Grotesk\',sans-serif;font-size:18px;font-weight:700;letter-spacing:-.01em;">380V FEEDERS</div>'+
+        '<div style="font-size:11.5px;color:#bcd4ef;font-weight:500;margin-top:1px;">3628SW02A-B · '+FEEDERS6.length+' items</div></div>'+
+        '<button id="f6Close" style="width:30px;height:30px;border:none;border-radius:8px;background:rgba(255,255,255,.16);color:#fff;font-size:17px;cursor:pointer;flex-shrink:0;">&times;</button>'+
+      '</div>'+
+      '<div style="flex:1;overflow-y:auto;padding:14px;">'+
+        '<div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 3px 14px rgba(10,30,60,.08);border:1px solid #e3e8ef;">'+
+          '<table style="width:100%;border-collapse:collapse;">'+
+            '<thead><tr style="background:#11202f;color:#fff;">'+
+              '<th style="padding:9px 12px;text-align:left;font-family:\'Space Grotesk\',sans-serif;font-size:11.5px;letter-spacing:.03em;">MOTOR ITEM NO.</th>'+
+              '<th colspan="2" style="padding:9px 8px;text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:11.5px;letter-spacing:.03em;border-left:1px solid #2c3e52;">RATING (kW)</th>'+
+            '</tr><tr style="background:#1c3350;color:#cfe0f5;">'+
+              '<th style="padding:4px 12px;"></th>'+
+              '<th style="padding:4px 8px;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;border-left:1px solid #2c3e52;">N</th>'+
+              '<th style="padding:4px 8px;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;border-left:1px solid #2c3e52;">S</th>'+
+            '</tr></thead><tbody>'+rows+'</tbody>'+
+          '</table>'+
+        '</div>'+
+      '</div>';
+    document.getElementById('f6Close').onclick=function(){ f6Modal.style.display='none'; };
+    Array.prototype.forEach.call(f6Panel.querySelectorAll('.f6Relay'),function(el){
+      el.addEventListener('click',function(){ openRelay(el.getAttribute('data-id')); });
+    });
+  }
+  f6Modal.addEventListener('click',function(e){ if(e.target===f6Modal) f6Modal.style.display='none'; });
+  (function(){
+    var g=document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.style.cursor='pointer';
+    var rc=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    rc.setAttribute('x',373);rc.setAttribute('y',388);rc.setAttribute('width',52);rc.setAttribute('height',10);
+    rc.setAttribute('rx','3');rc.setAttribute('fill','rgba(37,99,235,0)');rc.setAttribute('stroke','none');
+    rc.onmouseenter=function(){rc.setAttribute('fill','rgba(37,99,235,.28)');rc.setAttribute('stroke','#2563eb');rc.setAttribute('stroke-width','1.4');};
+    rc.onmouseleave=function(){rc.setAttribute('fill','rgba(37,99,235,0)');rc.setAttribute('stroke','none');};
+    var ti=document.createElementNS('http://www.w3.org/2000/svg','title'); ti.textContent='380V FEEDERS (6)';
+    g.addEventListener('click',function(e){ e.preventDefault(); e.stopPropagation(); if(!moved){ buildFeeder6Panel(); f6Modal.style.display='block'; } });
+    g.appendChild(rc); g.appendChild(ti); ov.appendChild(g);
+  })();
+
+  // ---- ① DC 24V FEEDERS hexagon → table panel ----
+  var DC24SETS={
+    1:{sub:'CRITICAL USER (FOR GTG CONTROL)', total:'5.4', feeders:[["1","CONTROL POWER FOR GTG UCP","100","1.6"],["2","CONTROL POWER FOR SGC#1 UCP","100","1.6"],["3","CONTROL POWER FOR SGC#2 UCP","100","1.6"],["4","CONTROL POWER FOR GTG UCP-F/F","32","0.3"],["5","CONTROL POWER FOR SGC#2 UCP-F/F","32","0.3"],["6","SPARE","100",""],["7","SPARE","32",""],["8","SPARE","16",""],["9","SPARE","16",""],["10","SPARE","16",""]]},
+    2:{sub:'CRITICAL USER (FOR GTG CONTROL)', total:'5.1', feeders:[["1","CONTROL POWER FOR GTG UCP","100","1.6"],["2","CONTROL POWER FOR SGC#1 UCP","100","1.6"],["3","CONTROL POWER FOR SGC#2 UCP","100","1.6"],["4","CONTROL POWER FOR SGC#1 UCP-F/F","32","0.3"],["5","SPARE","32",""],["6","SPARE","32",""],["7","SPARE","100",""],["8","SPARE","16",""],["9","SPARE","16",""],["10","SPARE","16",""]]}
+  };
+  var dcModal=document.createElement('div'); dcModal.style.cssText='display:none;position:fixed;inset:0;z-index:90;background:rgba(8,20,38,.35);';
+  var dcPanel=document.createElement('div'); dcPanel.style.cssText='position:absolute;top:0;right:0;height:100%;width:440px;max-width:92vw;background:#f3f6fa;box-shadow:-8px 0 30px rgba(10,30,60,.22);display:flex;flex-direction:column;';
+  dcModal.appendChild(dcPanel); document.body.appendChild(dcModal);
+  function buildDC24Panel(n){
+    var set=DC24SETS[n]||DC24SETS[1];
+    var rows=set.feeders.map(function(f,i){
+      var spare=/SPARE/i.test(f[1]);
+      var bg=spare?'#eef1f5':(i%2?'#f7f9fc':'#fff');
+      var rid='3628SW02-DC24-'+n+'-F'+('0'+f[0]).slice(-2);
+      var noCell=spare
+        ? '<td style="padding:6px 10px;border-bottom:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:600;color:#8a94a3;">'+esc(f[0])+'</td>'
+        : '<td class="dcRelay" data-id="'+esc(rid)+'" style="padding:6px 10px;border-bottom:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:700;color:#0b56a4;text-decoration:underline;cursor:pointer;">'+esc(f[0])+'</td>';
+      return '<tr style="background:'+bg+';">'+
+        noCell+
+        '<td style="padding:6px 12px;border-bottom:1px solid #e3e8ef;border-left:1px solid #e3e8ef;font-family:\'JetBrains Mono\',monospace;font-size:11.5px;'+(spare?'color:#8a94a3;font-style:italic;':'color:#11202f;')+'">'+esc(f[1])+'</td>'+
+        '<td style="padding:6px 8px;border-bottom:1px solid #e3e8ef;border-left:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;color:#11202f;">'+esc(f[2])+'</td>'+
+        '<td style="padding:6px 8px;border-bottom:1px solid #e3e8ef;border-left:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:600;color:#0b56a4;background:'+(f[3]?'rgba(11,86,164,.06)':'transparent')+';">'+esc(f[3])+'</td>'+
+      '</tr>';
+    }).join('');
+    dcPanel.innerHTML=
+      '<div style="background:linear-gradient(180deg,#0b4f95,#003d7c);color:#fff;padding:16px 20px;display:flex;align-items:center;gap:13px;flex-shrink:0;">'+
+        '<div style="width:34px;height:34px;flex-shrink:0;">'+
+          '<svg width="34" height="34" viewBox="0 0 34 34"><polygon points="9,3 25,3 33,17 25,31 9,31 1,17" fill="rgba(255,255,255,.14)" stroke="#cfe0f5" stroke-width="1.5"/><text x="17" y="22" text-anchor="middle" font-family="Space Grotesk,sans-serif" font-size="15" font-weight="700" fill="#fff">'+n+'</text></svg>'+
+        '</div>'+
+        '<div style="flex:1;min-width:0;"><div style="font-family:\'Space Grotesk\',sans-serif;font-size:18px;font-weight:700;letter-spacing:-.01em;">DC 24V FEEDERS</div>'+
+        '<div style="font-size:11.5px;color:#bcd4ef;font-weight:500;margin-top:1px;">'+set.sub+' · '+set.feeders.length+' items</div></div>'+
+        '<button id="dcClose" style="width:30px;height:30px;border:none;border-radius:8px;background:rgba(255,255,255,.16);color:#fff;font-size:17px;cursor:pointer;flex-shrink:0;">&times;</button>'+
+      '</div>'+
+      '<div style="flex:1;overflow-y:auto;padding:14px;">'+
+        '<div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 3px 14px rgba(10,30,60,.08);border:1px solid #e3e8ef;">'+
+          '<table style="width:100%;border-collapse:collapse;">'+
+            '<thead><tr style="background:#11202f;color:#fff;">'+
+              '<th style="padding:9px 10px;text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:11px;letter-spacing:.02em;">FEEDER<br>NO.</th>'+
+              '<th style="padding:9px 12px;text-align:left;font-family:\'Space Grotesk\',sans-serif;font-size:11px;letter-spacing:.02em;border-left:1px solid #2c3e52;">FEEDER DESCRIPTION</th>'+
+              '<th style="padding:9px 8px;text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:11px;letter-spacing:.02em;border-left:1px solid #2c3e52;">MCCB<br>RATING(A)</th>'+
+              '<th style="padding:9px 8px;text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:11px;letter-spacing:.02em;border-left:1px solid #2c3e52;">RATING<br>(kVA)</th>'+
+            '</tr></thead><tbody>'+rows+
+            '<tr style="background:#dde5ef;font-weight:700;"><td colspan="3" style="padding:8px 12px;text-align:right;font-family:\'Space Grotesk\',sans-serif;font-size:12px;color:#11202f;">TOTAL</td>'+
+            '<td style="padding:8px;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;color:#0b56a4;border-left:1px solid #c4d0de;">'+set.total+'</td></tr>'+
+            '</tbody>'+
+          '</table>'+
+        '</div>'+
+      '</div>';
+    document.getElementById('dcClose').onclick=function(){ dcModal.style.display='none'; };
+    Array.prototype.forEach.call(dcPanel.querySelectorAll('.dcRelay'),function(el){
+      el.addEventListener('click',function(){ openRelay(el.getAttribute('data-id')); });
+    });
+  }
+  dcModal.addEventListener('click',function(e){ if(e.target===dcModal) dcModal.style.display='none'; });
+  (function(){
+    // ① hexagon markers next to "CRITICAL USER (FOR GTG CONTROL)" labels (hexagon sits left of text)
+    var spots=[[507,484,106,32,2],[619,484,106,32,2],[736,484,106,32,2],[856,484,106,32,2],[967,484,106,32,2],[972,286,108,18,1]];
+    spots.forEach(function(s){
+      var dset=s[4]||1;
+      var g=document.createElementNS('http://www.w3.org/2000/svg','g');
+      g.style.cursor='pointer';
+      var rc=document.createElementNS('http://www.w3.org/2000/svg','rect');
+      rc.setAttribute('x',s[0]);rc.setAttribute('y',s[1]);rc.setAttribute('width',s[2]||20);rc.setAttribute('height',s[3]||15);
+      rc.setAttribute('rx','3');rc.setAttribute('fill','rgba(37,99,235,0)');rc.setAttribute('stroke','none');
+      rc.onmouseenter=function(){rc.setAttribute('fill','rgba(37,99,235,.28)');rc.setAttribute('stroke','#2563eb');rc.setAttribute('stroke-width','1.4');};
+      rc.onmouseleave=function(){rc.setAttribute('fill','rgba(37,99,235,0)');rc.setAttribute('stroke','none');};
+      var ti=document.createElementNS('http://www.w3.org/2000/svg','title'); ti.textContent='DC 24V FEEDERS';
+      g.addEventListener('click',function(e){ e.preventDefault(); e.stopPropagation(); if(!moved){ buildDC24Panel(dset); dcModal.style.display='block'; } });
+      g.appendChild(rc); g.appendChild(ti); ov.appendChild(g);
+    });
+  })();
+})();
+</script>
+</body>
+</html>
