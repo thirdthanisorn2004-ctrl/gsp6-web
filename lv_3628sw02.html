@@ -31,6 +31,9 @@
   <div id="relayModal" style="display:none;position:fixed;inset:0;z-index:100;align-items:stretch;justify-content:stretch;">
     <div id="relayCard" style="width:100%;height:100%;"></div>
   </div>
+  <div id="lsigModal" style="display:none;position:fixed;inset:0;z-index:110;background:rgba(8,20,38,.5);align-items:center;justify-content:center;padding:24px;font-family:'Plus Jakarta Sans',system-ui,sans-serif;">
+    <div id="lsigCard" style="width:560px;max-width:100%;max-height:90vh;overflow:auto;background:#fff;border-radius:16px;box-shadow:0 30px 80px rgba(8,20,38,.4);"></div>
+  </div>
   <div id="feederModal" style="display:none;position:fixed;inset:0;z-index:90;background:rgba(8,20,38,.35);">
     <div id="feederPanel" style="position:absolute;top:0;right:0;height:100%;width:420px;max-width:92vw;background:#f3f6fa;box-shadow:-8px 0 30px rgba(10,30,60,.22);display:flex;flex-direction:column;transform:translateX(0);"></div>
   </div>
@@ -45,7 +48,7 @@
       <div id="wrap" style="position:absolute;left:0;top:0;transform-origin:0 0;">
         <img id="sld" src="lv_3628sw02.svg" alt="LV 3628SW02A-B SLD" draggable="false"
              style="display:block;user-select:none;-webkit-user-drag:none;">
-        <svg id="ov" viewBox="0 0 1923.74 527.77" style="position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;"></svg>
+        <svg id="ov" viewBox="0 0 1923.74 529.49" style="position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;"></svg>
       </div>
     </div>
     <div style="position:absolute;right:18px;bottom:18px;display:flex;flex-direction:column;gap:8px;">
@@ -56,9 +59,10 @@
   </main>
 <script>
 (function(){
+  function addEditLog(action,relay,detail){try{var oid=localStorage.getItem('operator_id'),role=localStorage.getItem('user_role');var user=oid?(oid+(role?' ('+role+')':'')):(localStorage.getItem('token')?'admin':'user');var arr=[];try{arr=JSON.parse(localStorage.getItem('gsp6_edit_log')||'[]');}catch(e){}arr.unshift({t:Date.now(),action:action,relay:relay,detail:detail||'',user:user});if(arr.length>400)arr=arr.slice(0,400);localStorage.setItem('gsp6_edit_log',JSON.stringify(arr));}catch(e){}}
   var stage=document.getElementById('stage'), img=document.getElementById('sld'), wrap=document.getElementById('wrap'), ov=document.getElementById('ov');
   var scale=1, tx=0, ty=0, natW=0, natH=0, min=0.1, max=8;
-  var RELAYS=[["3628SW651A",59,58,12,14],["3628SW651B",164,58,12,14],["3628SW653",212,47,12,14],["3628SW652",104,195,12,14],["3628SW654A",485,129,12,14],["3628SW02-F25",1119,129,12,14],["3628SW02-F21",1028,325,12,14],["3628SW02-F27",1142,325,12,14],["3628EDP01A",258,129,12,14],["3626EML01_2",306,129,12,14],["3626EML01",348,129,12,14],["3628SW02-F01",388,129,12,14],["3628SW02-F02",438,129,12,14],["3628EDP01B",258,325,12,14],["3628SW02-F03",306,325,12,14],["3628SW02-F04",348,325,12,14],["3628SW02-F05",388,325,12,14],["3628PC02B",438,325,12,14],["3628SW02-F06",545,129,12,14],["3628SW02-F16",568,325,12,14],["3628SW02-F15",522,325,12,14],["3628SW02-F09",634,129,12,14],["3628SW02-F17",657,325,12,14],["3628SW02-F10",680,129,12,14],["3628SW02-F11",751,129,12,14],["3628SW02-F18",774,325,12,14],["3628SW02-F12",797,129,12,14],["3628SW02-F14",1030,130,12,14],["3628SW02-F13",894,129,12,14],["3628SW02-F20",917,325,12,14],["3628SW02-F19",871,325,12,14],["3628SW02-F26",1096,129,12,14],["3628SW02-F07",1252,129,12,14],["3628SW02-F23",1229,325,12,14],["3628SW02-F24",1206,325,12,14],["3628SW02-F08",1490,129,12,14],["3628SW02-F22",1557,325,12,14],["3628SW02-F28",522,392,12,14],["3628SW02-F208",545,392,12,14],["3628SW02-F209",568,392,12,14],["3628SW02-F210",522,431,12,14],["3628SW02-F211",568,431,12,14],["3628SW02-F212",545,441,12,14],["3628SW02-F214",545,456,12,14],["3628SW02-F215",534,469,12,14],["3628SW02-F216",557,469,12,14],["3628SW02-G400",513,408,12,14],["3628SW02-F35",634,392,12,14],["3628SW02-F218",657,392,12,14],["3628SW02-F219",680,392,12,14],["3628SW02-F220",634,431,12,14],["3628SW02-F221",680,431,12,14],["3628SW02-F222",657,441,12,14],["3628SW02-F224",657,456,12,14],["3628SW02-F225",645,469,12,14],["3628SW02-F226",668,469,12,14],["3628SW02-G401",625,408,12,14],["3628SW02-F42",751,392,12,14],["3628SW02-F228",774,392,12,14],["3628SW02-F229",797,392,12,14],["3628SW02-F230",751,431,12,14],["3628SW02-F231",797,431,12,14],["3628SW02-F232",774,441,12,14],["3628SW02-F234",774,456,12,14],["3628SW02-F235",762,469,12,14],["3628SW02-F236",785,469,12,14],["3628SW02-G402",742,408,12,14],["3628SW02-F49",871,392,12,14],["3628SW02-F238",894,392,12,14],["3628SW02-F239",917,392,12,14],["3628SW02-F240",871,431,12,14],["3628SW02-F241",917,431,12,14],["3628SW02-F242",894,441,12,14],["3628SW02-F244",894,456,12,14],["3628SW02-F245",882,469,12,14],["3628SW02-F246",905,469,12,14],["3628SW02-G403",862,408,12,14],["3628SW02-F248",1030,188,12,14],["3628SW02-F249",984,217,12,14],["3628SW02-F250",1030,226,12,14],["3628SW02-F251",1007,236,12,14],["3628SW02-F253",1007,252,12,14],["3628SW02-F254",996,264,12,14],["3628SW02-F255",1019,264,12,14],["3628SW02-F258",1003,217,12,14],["3628SW02-F62",1096,392,12,14],["3628SW02-F259",1119,392,12,14],["3628SW02-F260",1142,392,12,14],["3628SW02-F261",1096,431,12,14],["3628SW02-F262",1142,431,12,14],["3628SW02-F263",1119,441,12,14],["3628SW02-F265",1119,456,12,14],["3628SW02-F266",1108,469,12,14],["3628SW02-F267",1131,469,12,14],["3628SW02-G404",1087,408,12,14],["3628SW02-F69",1206,392,12,14],["3628SW02-F269",1229,392,12,14],["3628SW02-F270",1252,392,12,14],["3628SW02-F271",1206,431,12,14],["3628SW02-F272",1252,431,12,14],["3628SW02-F273",1229,441,12,14],["3628SW02-F275",1229,456,12,14],["3628SW02-F276",1218,469,12,14],["3628SW02-F277",1241,469,12,14],["3628SW02-G405",1198,408,12,14],["3628SW02-F105",1490,398,12,14],["3628SW02-F106",1557,398,12,14],["3628SW02-F107",1518,421,12,14],["3628SW02-F108",1470,430,12,14],["3628SW02-F110",1534,430,12,14],["3628SW02-F109",1499,430,12,14],["3628SW02-F111",1563,430,12,14],["3628SW02-F82",1702,129,12,14],["3628SW02-F83",1769,325,12,14],["3628SW02-F112",1702,398,12,14],["3628SW02-F113",1769,398,12,14],["3628SW02-F114",1730,421,12,14],["3628SW02-F115",1682,430,12,14],["3628SW02-F117",1746,430,12,14],["3628SW02-F116",1711,430,12,14],["3628SW02-F118",1775,430,12,14],["3628SW02-F287",1028,392,12,14],["3628SW02-F288",982,422,12,14],["3628SW02-F289",1028,431,12,14],["3628SW02-F290",1005,441,12,14],["3628SW02-F292",1005,456,12,14],["3628SW02-F293",994,469,12,14],["3628SW02-F294",1017,469,12,14],["3628SW02-F297",1001,422,12,14],["3628SW02-F96",1365,325,12,14],["3628SW02-F298",1365,392,12,14],["3628SW02-F299",1319,422,12,14],["3628SW02-F300",1365,431,12,14],["3628SW02-F301",1342,441,12,14],["3628SW02-F303",1342,456,12,14],["3628SW02-F304",1331,469,12,14],["3628SW02-F305",1354,469,12,14],["3628SW02-F308",1338,422,12,14],["3628SW02-F103",1348,129,12,14],["3628SW02-F309",1348,392,12,14],["3628SW02-F310",1348,431,12,14]];
+  var RELAYS=[["3628SW651A",59,58,12,14],["3628SW651B",164,58,12,14],["3628SW653",212,47,12,14],["3628SW652",104,195,12,14],["3628EDP01A",258,129,12,14],["3626EML01_2",306,129,12,14],["3626EML01",348,129,12,14],["3628SW02-F01",388,129,12,14],["3628SW02-F02",438,129,12,14],["3628EDP01B",258,325,12,14],["3628SW02-F03",306,325,12,14],["3628SW02-F04",348,325,12,14],["3628SW02-F05",388,325,12,14],["3628PC02B",438,325,12,14],["3628SW02-F08",1490,129,12,14],["3628SW02-F22",1557,325,12,14],["3628SW02-F82",1702,129,12,14],["3628SW02-F83",1769,325,12,14],["3628SW02-F96",1365,325,12,14],["3628SW654A",485,129,12,14],["3628SW02-F25",1119,129,12,14],["3628SW02-F06",545,129,12,14],["3628SW02-F09",634,129,12,14],["3628SW02-F10",680,129,12,14],["3628SW02-F11",751,129,12,14],["3628SW02-F12",797,129,12,14],["3628SW02-F14",1030,130,12,14],["3628SW02-F13",894,129,12,14],["3628SW02-F26",1096,129,12,14],["3628SW02-F07",1252,129,12,14],["3628SW02-F103",1348,129,12,14],["3628SW02-F21",1028,325,12,14],["3628SW02-F27",1142,325,12,14],["3628SW02-F16",568,325,12,14],["3628SW02-F15",522,325,12,14],["3628SW02-F17",657,325,12,14],["3628SW02-F18",774,325,12,14],["3628SW02-F20",917,325,12,14],["3628SW02-F19",871,325,12,14],["3628SW02-F23",1229,325,12,14],["3628SW02-F24",1206,325,12,14]];
   RELAYS.forEach(function(r){
     var g=document.createElementNS('http://www.w3.org/2000/svg','a');
     g.setAttribute('href','GSP6 Diagnostics.dc.html?relay='+encodeURIComponent(r[0]));
@@ -114,12 +118,376 @@
     if(e.data==='closeRelayPopup') modal.style.display='none';
     if(e.data==='popupReady'){ pfReady=true; if(pendingId!=null){ pf.contentWindow.postMessage({type:'openRelay',id:pendingId},'*'); pendingId=null; } }
   });
-  document.addEventListener('keydown',function(e){ if(e.key==='Escape') modal.style.display='none'; });
-  function openRelay(id){
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ modal.style.display='none'; document.getElementById('lsigModal').style.display='none'; } });
+  function openRelayIframe(id){
     modal.style.display='flex';
     if(!pf) initFrame();
     if(pfReady){ pf.contentWindow.postMessage({type:'openRelay',id:id},'*'); }
     else { pendingId=id; }
+  }
+  // ---- LSIG breaker popup (native) ----
+  var API='https://gsp-backend-ppwh.onrender.com/api/relays';
+  var lsigModal=document.getElementById('lsigModal'), lsigCard=document.getElementById('lsigCard');
+  var isAdmin=(function(){try{return (localStorage.getItem('user_role')||localStorage.getItem('role'))==='admin';}catch(e){return false;}})();
+  function tok(){try{return localStorage.getItem('token')||'';}catch(e){return '';}}
+  lsigModal.addEventListener('click',function(e){ if(e.target===lsigModal) lsigModal.style.display='none'; });
+  var CHAR_OPTS=['DT','SI','VI','EI','I2t'];
+  function blankLSIG(){ return { In:'', tol:5, L:{Ir:'',tr:'',char:'SI',on:true}, S:{Isd:'',tsd:'',char:'DT',on:false}, I:{Ii:'',on:true}, G:{Ig:'',tg:'',char:'DT',on:false} }; }
+  function parseName(rec){ try{ if(rec&&rec.Remark){ var j=JSON.parse(rec.Remark); if(j&&j.__name) return j.__name; } }catch(e){} return ''; }
+  function parseLSIG(rec){
+    var d=blankLSIG();
+    try{ if(rec&&rec.Remark){ var j=JSON.parse(rec.Remark); if(j&&j.__lsig){ return Object.assign(blankLSIG(), j.__lsig, {L:Object.assign(d.L,j.__lsig.L),S:Object.assign(d.S,j.__lsig.S),I:Object.assign(d.I,j.__lsig.I),G:Object.assign(d.G,j.__lsig.G)}); } } }catch(e){}
+    // fallback: map from standard fields
+    if(rec){
+      d.In = rec.CT_Ratio ? String(rec.CT_Ratio).split('/')[0] : '';
+      d.L.Ir = rec.Phase_Prim_Amps!=null?rec.Phase_Prim_Amps:''; d.L.tr = rec.Phase_Time_Dial!=null?rec.Phase_Time_Dial:''; if(rec.Phase_Curve)d.L.char=rec.Phase_Curve;
+      d.I.Ii = rec.Phase_Inst_Prim_Amps!=null?rec.Phase_Inst_Prim_Amps:'';
+      d.G.Ig = rec.Ground_Prim_Amps!=null?rec.Ground_Prim_Amps:''; d.G.tg = rec.Ground_Time_Dial!=null?rec.Ground_Time_Dial:'';
+      var dn=String(rec.Device_Number||''); d.G.on=/50N|51N/i.test(dn);
+    }
+    return d;
+  }
+  var curId=null, curName='', curRec=null, curLSIG=null, editing=false;
+  function fnum(v){ return (v===''||v==null)?'—':v; }
+  function cell(txt){ return '<td style="border:1px solid #d7dee8;padding:7px 9px;font-size:13px;text-align:center;color:#11202f;">'+txt+'</td>'; }
+  var _tcc=null;
+  function buildTCC(d){
+    var X0=46,X1=330,Y0=14,Y1=272,PW=X1-X0,PH=Y1-Y0;
+    function xp(I){ return X0+(Math.log(I)/Math.LN10-1)/4*PW; }
+    function yp(t){ return Y0+(3-Math.log(t)/Math.LN10)/5*PH; }
+    function xInv(px){ return Math.pow(10, 1+(px-X0)/PW*4); }
+    function tPhase(I,s){
+      var Ir=parseFloat(d.L.Ir), tr=parseFloat(d.L.tr);
+      var Isd=parseFloat(d.S.Isd), tsd=parseFloat(d.S.tsd);
+      var Ii=parseFloat(d.I.Ii);
+      if(d.I.on&&Ii&&I>=Ii*s) return 0.02;
+      if(d.S.on&&Isd&&tsd&&I>=Isd*s) return tsd;
+      if(d.L.on&&Ir&&tr&&I>Ir*s) return tr*36*Math.pow(Ir*s/I,2);
+      return null;
+    }
+    _tcc={xp:xp,yp:yp,xInv:xInv,tPhase:tPhase,X0:X0,X1:X1,Y0:Y0,Y1:Y1};
+    function samp(s){ var p=[]; for(var k=0;k<=240;k++){ var I=Math.pow(10,1+4*k/240); var t=tPhase(I,s); if(t!=null){ t=Math.max(0.01,Math.min(1000,t*s)); p.push([xp(I),yp(t)]); } } return p; }
+    function str(p){ return p.map(function(a){return a[0].toFixed(1)+','+a[1].toFixed(1);}).join(' '); }
+    var tol=parseFloat(d.tol)||0, f=tol/100;
+    var mid=samp(1), lo=samp(1-f), hi=samp(1+f);
+    var grid='';
+    var xl=['10','100','1K','10K','100K'];
+    for(var i=0;i<=4;i++){ var x=X0+i/4*PW; grid+='<line x1="'+x+'" y1="'+Y0+'" x2="'+x+'" y2="'+Y1+'" stroke="#eef1f5"/>'+'<text x="'+x+'" y="'+(Y1+13)+'" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#98a1ae">'+xl[i]+'</text>'; }
+    var yl=['1K','100','10','1','.1','.01'];
+    for(var j=0;j<=5;j++){ var y=Y0+j/5*PH; grid+='<line x1="'+X0+'" y1="'+y+'" x2="'+X1+'" y2="'+y+'" stroke="#eef1f5"/>'+'<text x="'+(X0-4)+'" y="'+(y+3)+'" text-anchor="end" font-family="JetBrains Mono,monospace" font-size="9" fill="#98a1ae">'+yl[j]+'</text>'; }
+    var band='';
+    if(f>0 && lo.length && hi.length){ band='<polygon points="'+str(lo)+' '+str(hi.slice().reverse())+'" fill="rgba(37,99,235,.14)" stroke="none"/>'; }
+    var line = mid.length?'<polyline points="'+str(mid)+'" fill="none" stroke="#0b56a4" stroke-width="2" stroke-linejoin="round"/>':'';
+    var gnd='';
+    var Ig=parseFloat(d.G.Ig), tg=parseFloat(d.G.tg);
+    if(d.G.on&&Ig&&tg){ var gx=xp(Ig), gy=yp(Math.max(0.01,Math.min(1000,tg))); gnd='<polyline points="'+gx.toFixed(1)+','+Y0+' '+gx.toFixed(1)+','+gy.toFixed(1)+' '+X1+','+gy.toFixed(1)+'" fill="none" stroke="#0f8a4d" stroke-width="1.6" stroke-dasharray="5 3"/>'; }
+    var empty = (!mid.length && !gnd) ? '<text x="'+((X0+X1)/2)+'" y="'+((Y0+Y1)/2)+'" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="12" fill="#b7bfca">ยังไม่มีข้อมูลพอวาดกราฟ</text>' : '';
+    return '<svg id="tccSvg" viewBox="0 0 342 292" style="width:100%;height:auto;display:block;cursor:crosshair;"><rect x="'+X0+'" y="'+Y0+'" width="'+PW+'" height="'+PH+'" fill="#fff" stroke="#d7dee8"/>'+grid+band+gnd+line+empty+'<g id="tccCur" style="display:none;pointer-events:none;"><line id="tccVX" stroke="#11202f" stroke-width=".7" stroke-dasharray="3 2"/><line id="tccHX" stroke="#11202f" stroke-width=".7" stroke-dasharray="3 2"/><path id="tccDot" d="" stroke="#111" stroke-width="1.6"/><rect id="tccBoxR" fill="#11202f" rx="3"/><text id="tccBoxT" fill="#fff" font-family="JetBrains Mono,monospace" font-size="9.5" font-weight="600"/></g><text x="'+((X0+X1)/2)+'" y="290" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#98a1ae">Current (A)</text></svg>';
+  }
+  function fmtI(I){ return I>=1000?(I/1000).toFixed(I>=10000?0:2)+' kA':Math.round(I)+' A'; }
+  function fmtT(t){ return t>=100?t.toFixed(0)+' s':t>=1?t.toFixed(2)+' s':t.toFixed(3)+' s'; }
+  function wireTCC(){
+    var svg=document.getElementById('tccSvg'); if(!svg||!_tcc) return;
+    var g=_tcc;
+    svg.addEventListener('mousemove',function(ev){
+      var r=svg.getBoundingClientRect();
+      var px=(ev.clientX-r.left)/r.width*342, py=(ev.clientY-r.top)/r.height*292;
+      if(px<g.X0||px>g.X1){ document.getElementById('tccCur').style.display='none'; return; }
+      var I=g.xInv(px); var t=g.tPhase(I,1);
+      var cur=document.getElementById('tccCur');
+      if(t==null){ cur.style.display='none'; return; }
+      t=Math.max(0.01,Math.min(1000,t));
+      var cx=g.xp(I), cy=g.yp(t);
+      cur.style.display='';
+      var vx=document.getElementById('tccVX'); vx.setAttribute('x1',cx);vx.setAttribute('y1',g.Y0);vx.setAttribute('x2',cx);vx.setAttribute('y2',g.Y1);
+      var hx=document.getElementById('tccHX'); hx.setAttribute('x1',g.X0);hx.setAttribute('y1',cy);hx.setAttribute('x2',g.X1);hx.setAttribute('y2',cy);
+      document.getElementById('tccDot').setAttribute('d','M'+(cx-4)+','+(cy-4)+'L'+(cx+4)+','+(cy+4)+'M'+(cx+4)+','+(cy-4)+'L'+(cx-4)+','+(cy+4));
+      var label='I = '+fmtI(I)+'  /  t = '+fmtT(t);
+      var bw=label.length*5.6+10, bx=Math.min(cx+8,g.X1-bw), by=Math.max(cy-20,g.Y0+2);
+      var br=document.getElementById('tccBoxR'); br.setAttribute('x',bx);br.setAttribute('y',by);br.setAttribute('width',bw);br.setAttribute('height',15);
+      var bt=document.getElementById('tccBoxT'); bt.setAttribute('x',bx+5);bt.setAttribute('y',by+10.5);bt.textContent=label;
+    });
+    svg.addEventListener('mouseleave',function(){ document.getElementById('tccCur').style.display='none'; });
+  }
+  function inp(sec,key,val,w){ return '<input data-sec="'+sec+'" data-key="'+key+'" value="'+(val==null?'':val)+'" style="width:'+(w||58)+'px;border:1px solid #c7cfda;border-radius:6px;padding:5px 6px;font-size:13px;text-align:center;font-family:inherit;">'; }
+  function sel(sec,val){ return '<select data-sec="'+sec+'" data-key="char" style="border:1px solid #c7cfda;border-radius:6px;padding:5px 4px;font-size:12px;font-family:inherit;">'+CHAR_OPTS.map(function(o){return '<option'+(o===val?' selected':'')+'>'+o+'</option>';}).join('')+'</select>'; }
+  function tog(sec,on){ return '<input type="checkbox" data-sec="'+sec+'" data-key="on"'+(on?' checked':'')+' style="width:17px;height:17px;">'; }
+  function renderLSIG(){
+    var d=curLSIG, e=editing;
+    function v(sec,key){ var val=d[sec][key]; return e?inp(sec,key,val):fnum(val); }
+    function vc(sec){ return e?sel(sec,d[sec].char):(d[sec].char||'—'); }
+    function vo(sec){ return e?tog(sec,d[sec].on):(d[sec].on?'✔':'–'); }
+    var SECS=[
+      {sec:'L',letter:'L',name:'Long-time · Overload',color:'#0b56a4',bg:'#eef4fb',fields:[['Ir','Ir','A'],['tr','tr','s']],char:true},
+      {sec:'S',letter:'S',name:'Short-time delay',color:'#7c3aed',bg:'#f3eefe',fields:[['Isd','Isd','A'],['tsd','tsd','s']],char:true},
+      {sec:'I',letter:'I',name:'Instantaneous',color:'#dc2626',bg:'#fdeeee',fields:[['Ii','Ii','A']],char:false},
+      {sec:'G',letter:'G',name:'Ground fault',color:'#0f8a4d',bg:'#e9f6ef',fields:[['Ig','Ig','A'],['tg','tg','s']],char:true}
+    ];
+    function prow(sec,key,label,unit){
+      var val=d[sec][key];
+      var right = e ? inp(sec,key,val,90) : '<span style="font-family:\'JetBrains Mono\',monospace;font-weight:600;color:#11202f;">'+fnum(val)+(val!==''&&val!=null&&unit?' <span style="color:#98a1ae;font-weight:400;">'+unit+'</span>':'')+'</span>';
+      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f2f6;"><span style="font-size:13px;color:#586273;">'+label+' ['+unit+']</span>'+right+'</div>';
+    }
+    function charRow(sec){
+      var right = e ? sel(sec,d[sec].char) : '<span style="font-family:\'JetBrains Mono\',monospace;font-weight:600;color:#11202f;">'+(d[sec].char||'—')+'</span>';
+      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;"><span style="font-size:13px;color:#586273;">Char.</span>'+right+'</div>';
+    }
+    function secCard(cfg){
+      var on=d[cfg.sec].on;
+      var toggle = e ? tog(cfg.sec,on)
+        : '<span style="font-size:11px;font-weight:700;letter-spacing:.06em;padding:3px 9px;border-radius:999px;'+(on?'background:'+cfg.bg+';color:'+cfg.color+';':'background:#f1f3f7;color:#aeb6c2;')+'">'+(on?'ON':'OFF')+'</span>';
+      var dim = (!e && !on) ? 'opacity:.5;' : '';
+      var rows=cfg.fields.map(function(f){return prow(cfg.sec,f[0],f[1],f[2]);}).join('')+(cfg.char?charRow(cfg.sec):'');
+      return '<div style="border:1px solid #e7ebf1;border-left:4px solid '+cfg.color+';border-radius:12px;padding:0 16px 8px;'+dim+'">'+
+        '<div style="display:flex;align-items:center;gap:11px;padding:13px 0 9px;border-bottom:1px solid #eef1f5;">'+
+          '<span style="width:28px;height:28px;border-radius:8px;background:'+cfg.color+';color:#fff;display:flex;align-items:center;justify-content:center;font-family:\'Space Grotesk\',sans-serif;font-weight:700;font-size:15px;">'+cfg.letter+'</span>'+
+          '<span style="flex:1;font-family:\'Space Grotesk\',sans-serif;font-weight:600;font-size:14px;color:#11202f;">'+cfg.name+'</span>'+toggle+
+        '</div>'+rows+'</div>';
+    }
+    var inRow='<div style="display:flex;align-items:center;justify-content:space-between;border:1px solid #e7ebf1;border-radius:12px;background:#f7fafe;padding:14px 16px;margin-bottom:12px;">'+
+      '<span style="font-family:\'Space Grotesk\',sans-serif;font-weight:600;font-size:14px;color:#11202f;">Rated Current <span style="color:#98a1ae;font-weight:400;">In [A]</span></span>'+
+      (e?inp('root','In',d.In,110):'<span style="font-family:\'JetBrains Mono\',monospace;font-weight:700;font-size:16px;color:#0b56a4;">'+fnum(d.In)+'</span>')+'</div>';
+    var tolRow='<div style="display:flex;align-items:center;justify-content:space-between;border:1px solid #e7ebf1;border-radius:12px;background:#fff;padding:12px 16px;margin-bottom:14px;">'+
+      '<span style="font-family:\'Space Grotesk\',sans-serif;font-weight:600;font-size:14px;color:#11202f;">MCCB Tolerance <span style="color:#98a1ae;font-weight:400;">± %</span></span>'+
+      (e?inp('root','tol',d.tol,80):'<span style="font-family:\'JetBrains Mono\',monospace;font-weight:700;font-size:15px;color:#7c3aed;">±'+fnum(d.tol)+'%</span>')+'</div>';
+    var graphHtml='<div style="margin:0 0 16px;border:1px solid #e7ebf1;border-radius:12px;padding:14px 14px 8px;background:#fff;">'+
+      '<div style="font-family:\'JetBrains Mono\',monospace;font-size:10.5px;letter-spacing:.1em;color:#0b56a4;font-weight:600;margin-bottom:8px;">TCC CURVE</div>'+
+      buildTCC(d)+
+      '<div style="font-size:11px;color:#98a1ae;margin-top:6px;line-height:1.5;">เส้นน้ำเงิน = Phase (L·S·I) ±'+fnum(d.tol)+'% band · เส้นเขียวปะ = Ground</div></div>';
+    var body=graphHtml+inRow+tolRow+'<div style="display:grid;gap:12px;">'+SECS.map(secCard).join('')+'</div>';
+    var btns='';
+    if(isAdmin){
+      btns = e
+        ? '<span style="display:flex;align-items:center;gap:8px;"><div id="lsigCancel" style="padding:7px 13px;border-radius:8px;border:1px solid #d7dee8;background:#fff;color:#586273;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;">Cancel</div><div id="lsigSave" style="display:flex;align-items:center;gap:7px;padding:7px 14px;border-radius:8px;background:#0f8a4d;color:#fff;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;">Save Changes</div></span>'
+        : '<div id="lsigEdit" style="display:flex;align-items:center;gap:7px;padding:7px 13px;border-radius:8px;background:#0b56a4;color:#fff;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>Edit Parameters</div>';
+    }
+    var mfr=(curRec&&curRec.Relay_Manufacturer)?curRec.Relay_Manufacturer:'—';
+    var model=(curRec&&curRec.Relay_Model)?curRec.Relay_Model:'—';
+    var brk=(curRec&&curRec.Breaker)?curRec.Breaker:'—';
+    lsigCard.innerHTML=
+      '<div style="display:flex;align-items:flex-start;gap:14px;padding:20px 22px;border-bottom:1px solid #eff2f7;background:linear-gradient(180deg,#f7fafe,#fff);border-radius:16px 16px 0 0;">'+
+        '<div style="width:42px;height:42px;border-radius:11px;background:#e7f5ee;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="20" height="20" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" fill="#16a34a"></rect><path d="M8 8 L16 16 M16 8 L8 16" stroke="#fff" stroke-width="2" stroke-linecap="round"></path></svg></div>'+
+        '<div style="flex:1;min-width:0;">'+(e?'<input id="lsigName" value="'+esc(curName||curId)+'" style="width:100%;font-family:\'Space Grotesk\',sans-serif;font-size:18px;font-weight:700;color:#11202f;border:1px solid #c7cfda;border-radius:8px;padding:5px 9px;">':'<div style="font-family:\'Space Grotesk\',sans-serif;font-size:19px;font-weight:700;letter-spacing:-.01em;color:#11202f;">'+esc(curName||curId)+'</div>')+'<div style="font-family:\'JetBrains Mono\',monospace;font-size:11px;color:#98a1ae;letter-spacing:.04em;margin-top:4px;">Protection Relay · Breaker '+esc(brk)+'</div></div>'+
+        '<div id="lsigClose" style="width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#98a1ae;cursor:pointer;flex-shrink:0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"></line><line x1="18" y1="6" x2="6" y2="18"></line></svg></div>'+
+      '</div>'+
+      '<div style="display:flex;align-items:center;gap:22px;padding:13px 22px;border-bottom:1px solid #eff2f7;font-family:\'JetBrains Mono\',monospace;font-size:11px;">'+
+        '<div><span style="color:#98a1ae;">MFR </span><span style="color:#11202f;font-weight:600;">'+esc(mfr)+'</span></div>'+
+        '<div><span style="color:#98a1ae;">MODEL </span><span style="color:#11202f;font-weight:600;">'+esc(model)+'</span></div>'+
+        '<div style="flex:1;"></div>'+btns+
+      '</div>'+
+      '<div style="padding:18px 22px 22px;overflow-y:auto;">'+
+        '<div id="lsigMsg" style="display:none;margin-bottom:12px;padding:9px 12px;border-radius:8px;font-size:13px;"></div>'+
+        '<div style="font-family:\'JetBrains Mono\',monospace;font-size:10.5px;letter-spacing:.1em;color:#0b56a4;font-weight:600;margin:0 0 10px;">LSIG Protection Settings</div>'+
+        body+
+        '<div style="margin-top:14px;font-size:12px;color:#98a1ae;">L = Long-time (overload) · S = Short-time delay · I = Instantaneous · G = Ground fault</div>'+
+      '</div>';
+    document.getElementById('lsigClose').onclick=function(){ lsigModal.style.display='none'; };
+    wireTCC();
+    if(isAdmin && !e){ document.getElementById('lsigEdit').onclick=function(){ editing=true; renderLSIG(); }; }
+    if(isAdmin && e){
+      document.getElementById('lsigCancel').onclick=function(){ editing=false; curLSIG=parseLSIG(curRec); renderLSIG(); };
+      document.getElementById('lsigSave').onclick=saveLSIG;
+    }
+  }
+  function collectInputs(){
+    var d=blankLSIG(); d.In=curLSIG.In;
+    lsigCard.querySelectorAll('[data-sec]').forEach(function(el){
+      var sec=el.getAttribute('data-sec'), key=el.getAttribute('data-key');
+      var val= el.type==='checkbox'?el.checked:el.value;
+      if(sec==='root') d[key]=val; else d[sec][key]=val;
+    });
+    return d;
+  }
+  function saveLSIG(){
+    var msg=document.getElementById('lsigMsg');
+    var nameEl=document.getElementById('lsigName'); if(nameEl) curName=nameEl.value.trim()||curId;
+    var d=collectInputs(); curLSIG=d;
+    var body={ Remark: JSON.stringify({ __lsig:d, __name:curName }),
+      CT_Ratio: (d.In?d.In+'/1':'') || (curRec&&curRec.CT_Ratio)||'',
+      Phase_Curve:d.L.char, Phase_Prim_Amps:num(d.L.Ir), Phase_Time_Dial:num(d.L.tr),
+      Phase_Inst_Prim_Amps:num(d.I.Ii),
+      Ground_Curve:d.G.char, Ground_Prim_Amps:num(d.G.Ig), Ground_Time_Dial:num(d.G.tg) };
+    msg.style.display='block'; msg.style.background='#fff7e6'; msg.style.color='#8a5a00'; msg.textContent='กำลังบันทึก…';
+    fetch(API+'/'+encodeURIComponent(curId),{method:'PUT',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tok()},body:JSON.stringify(body)})
+      .then(function(r){ return r.text().then(function(t){ return {st:r.status,t:t}; }); })
+      .then(function(res){
+        if(res.st>=200&&res.st<300){ msg.style.background='#e7f7ec'; msg.style.color='#1a7a3d'; msg.textContent='บันทึกสำเร็จ'; addEditLog('EDIT',curId,'LSIG settings'); editing=false; if(curRec){curRec.Remark=body.Remark;} if(_relayCache){var rc=_relayCache.find(function(x){return x.Relay_ID===curId;}); if(rc)rc.Remark=body.Remark;} renderLSIG(); }
+        else { msg.style.background='#fdeaea'; msg.style.color='#b23'; msg.textContent='บันทึกไม่สำเร็จ ('+res.st+')'; }
+      }).catch(function(e){ msg.style.background='#fdeaea'; msg.style.color='#b23'; msg.textContent='ผิดพลาด: '+e; });
+  }
+  function num(v){ if(v===''||v==null) return null; var n=parseFloat(v); return isNaN(n)?null:n; }
+  // ===== MCC (CEM11 motor protection) popup — red-boxed parameters only =====
+  var MCC_SECS=[
+    {k:'TOL', name:'Thermal Overload Protection', color:'#dc2626', fields:[['lvl','Trip Level','%'],['cls','Trip Class','']]},
+    {k:'STALL', name:'High Current Protection (Stall)', color:'#ea580c', fields:[['lvl','Trip Level','%'],['dly','Trip Delay','sec']]},
+    {k:'PLOSS', name:'Phase Loss Protection', color:'#b45309', fields:[['cls','Trip Class',''],['dly','Trip Delay','sec']]},
+    {k:'PIMB', name:'Phase Imbalance Protection', color:'#7c3aed', fields:[['cls','Trip Class',''],['lvl','Trip Level','%'],['dly','Trip Delay','sec']]},
+    {k:'UV', name:'Under Voltage Protection', color:'#0b56a4', fields:[['lvl','Trip Level','%'],['dly','Trip Delay','sec'],['rst','Reset Voltage Level','%'],['ard','Auto Restart Delay','sec'],['nom','Nom. Voltage','V']]},
+    {k:'LOWC', name:'Low Current Protection', color:'#0891b2', fields:[['lvl','Trip Level','%'],['dly','Trip Delay','sec']]},
+    {k:'EF', name:'Earth Fault', color:'#0f8a4d', fields:[['thr','Earth Fault Current Threshold','mA'],['dly','Trip Delay','sec']]}
+  ];
+  function blankMCC(){ var o={tol:5,In:''}; MCC_SECS.forEach(function(s){ o[s.k]={on:true}; s.fields.forEach(function(f){ o[s.k][f[0]]=''; }); }); return o; }
+  var MCC_CLASS=['5','10A','10','20','30'];
+  function parseMCC(rec){ var d=blankMCC(); try{ if(rec&&rec.Remark){ var j=JSON.parse(rec.Remark); if(j&&j.__mcc){ if(j.__mcc.tol!=null) d.tol=j.__mcc.tol; if(j.__mcc.In!=null) d.In=j.__mcc.In; MCC_SECS.forEach(function(s){ if(j.__mcc[s.k]){ Object.assign(d[s.k], j.__mcc[s.k]); if(j.__mcc[s.k].on===undefined) d[s.k].on=true; } }); } } }catch(e){} return d; }
+  var _mtcc=null;
+  function buildMCCTCC(d){
+    var X0=46,X1=330,Y0=14,Y1=272,PW=X1-X0,PH=Y1-Y0;
+    function xp(M){ return X0+(Math.log(M)/Math.LN10)/2*PW; }        // X = ×FLC, 1..100 (2 decades)
+    function yp(t){ return Y0+(3-Math.log(t)/Math.LN10)/5*PH; }
+    function xInv(px){ return Math.pow(10,(px-X0)/PW*2); }
+    var cls=parseFloat(d.TOL.cls), tl=(parseFloat(d.TOL.lvl)||100)/100;
+    var Msd=(parseFloat(d.STALL.lvl)||0)/100, tsd=parseFloat(d.STALL.dly);
+    var tolOn=d.TOL.on!==false, stallOn=d.STALL.on!==false;
+    function tAt(M,s){
+      var a=[];
+      if(tolOn&&cls&&M>tl*s) a.push(cls*35/(Math.pow(M/(tl*s),2)-1));
+      if(stallOn&&Msd&&tsd&&M>=Msd*s) a.push(tsd);
+      return a.length?Math.min.apply(null,a):null;
+    }
+    _mtcc={xp:xp,yp:yp,xInv:xInv,tAt:function(M){return tAt(M,1);},X0:X0,X1:X1,Y0:Y0,Y1:Y1};
+    function samp(s){ var p=[]; for(var k=0;k<=240;k++){ var M=Math.pow(10,2*k/240); var t=tAt(M,s); if(t!=null){ t=Math.max(0.01,Math.min(1000,t*s)); p.push([xp(M),yp(t)]); } } return p; }
+    function str(p){ return p.map(function(a){return a[0].toFixed(1)+','+a[1].toFixed(1);}).join(' '); }
+    var mid=samp(1);
+    var tolM=parseFloat(d.tol)||0, fM=tolM/100;
+    var loM=samp(1-fM), hiM=samp(1+fM);
+    var grid='';
+    var xl=['1','10','100'];
+    for(var i=0;i<=2;i++){ var x=X0+i/2*PW; grid+='<line x1="'+x+'" y1="'+Y0+'" x2="'+x+'" y2="'+Y1+'" stroke="#eef1f5"/>'+'<text x="'+x+'" y="'+(Y1+13)+'" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#98a1ae">'+xl[i]+'</text>'; }
+    var yl=['1K','100','10','1','.1','.01'];
+    for(var j=0;j<=5;j++){ var y=Y0+j/5*PH; grid+='<line x1="'+X0+'" y1="'+y+'" x2="'+X1+'" y2="'+y+'" stroke="#eef1f5"/>'+'<text x="'+(X0-4)+'" y="'+(y+3)+'" text-anchor="end" font-family="JetBrains Mono,monospace" font-size="9" fill="#98a1ae">'+yl[j]+'</text>'; }
+    var line = mid.length?'<polyline points="'+str(mid)+'" fill="none" stroke="#dc2626" stroke-width="2" stroke-linejoin="round"/>':'';
+    var band='';
+    if(fM>0 && loM.length>1 && hiM.length>1){ band='<polygon points="'+str(loM)+' '+str(hiM.slice().reverse())+'" fill="rgba(220,38,38,.14)" stroke="none"/>'; }
+    var empty = (!mid.length) ? '<text x="'+((X0+X1)/2)+'" y="'+((Y0+Y1)/2)+'" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-size="12" fill="#b7bfca">ยังไม่มีข้อมูลพอวาดกราฟ</text>' : '';
+    return '<svg id="mtccSvg" viewBox="0 0 342 292" style="width:100%;height:auto;display:block;cursor:crosshair;"><rect x="'+X0+'" y="'+Y0+'" width="'+PW+'" height="'+PH+'" fill="#fff" stroke="#d7dee8"/>'+grid+band+line+empty+'<g id="mtccCur" style="display:none;pointer-events:none;"><line id="mtVX" stroke="#11202f" stroke-width=".7" stroke-dasharray="3 2"/><line id="mtHX" stroke="#11202f" stroke-width=".7" stroke-dasharray="3 2"/><path id="mtDot" d="" stroke="#111" stroke-width="1.6"/><rect id="mtBoxR" fill="#11202f" rx="3"/><text id="mtBoxT" fill="#fff" font-family="JetBrains Mono,monospace" font-size="9.5" font-weight="600"/></g><text x="'+((X0+X1)/2)+'" y="290" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#98a1ae">Current (× FLC)</text></svg>';
+  }
+  function wireMCCTCC(){
+    var svg=document.getElementById('mtccSvg'); if(!svg||!_mtcc) return; var g=_mtcc;
+    svg.addEventListener('mousemove',function(ev){
+      var r=svg.getBoundingClientRect(); var px=(ev.clientX-r.left)/r.width*342, py=(ev.clientY-r.top)/r.height*292;
+      var cur=document.getElementById('mtccCur');
+      if(px<g.X0||px>g.X1){ cur.style.display='none'; return; }
+      var M=g.xInv(px); var t=g.tAt(M);
+      if(t==null){ cur.style.display='none'; return; }
+      t=Math.max(0.01,Math.min(1000,t)); var cx=g.xp(M), cy=g.yp(t);
+      cur.style.display='';
+      var vx=document.getElementById('mtVX'); vx.setAttribute('x1',cx);vx.setAttribute('y1',g.Y0);vx.setAttribute('x2',cx);vx.setAttribute('y2',g.Y1);
+      var hx=document.getElementById('mtHX'); hx.setAttribute('x1',g.X0);hx.setAttribute('y1',cy);hx.setAttribute('x2',g.X1);hx.setAttribute('y2',cy);
+      document.getElementById('mtDot').setAttribute('d','M'+(cx-4)+','+(cy-4)+'L'+(cx+4)+','+(cy+4)+'M'+(cx+4)+','+(cy-4)+'L'+(cx-4)+','+(cy+4));
+      var label='I = '+M.toFixed(M<10?2:1)+'×  /  t = '+(t>=100?t.toFixed(0):t>=1?t.toFixed(2):t.toFixed(3))+' s';
+      var bw=label.length*5.6+10, bx=Math.min(cx+8,g.X1-bw), by=Math.max(cy-20,g.Y0+2);
+      var br=document.getElementById('mtBoxR'); br.setAttribute('x',bx);br.setAttribute('y',by);br.setAttribute('width',bw);br.setAttribute('height',15);
+      var bt=document.getElementById('mtBoxT'); bt.setAttribute('x',bx+5);bt.setAttribute('y',by+10.5);bt.textContent=label;
+    });
+    svg.addEventListener('mouseleave',function(){ document.getElementById('mtccCur').style.display='none'; });
+  }
+  var mccId=null, mccName='', mccRec=null, mccData=null, mccEditing=false;
+  function renderMCC(){
+    var d=mccData, e=mccEditing;
+    var cards=MCC_SECS.map(function(s){
+      var son=d[s.k].on!==false;
+      var rows=s.fields.map(function(f){
+        var val=d[s.k][f[0]];
+        var right = e ? (f[0]==='cls'
+            ? '<select data-sec="'+s.k+'" data-key="'+f[0]+'" style="width:96px;border:1px solid #c7cfda;border-radius:6px;padding:5px 6px;font-size:13px;font-family:inherit;"><option value="">—</option>'+MCC_CLASS.map(function(o){return '<option'+(String(val)===o?' selected':'')+'>'+o+'</option>';}).join('')+'</select>'
+            : '<input data-sec="'+s.k+'" data-key="'+f[0]+'" value="'+(val==null?'':esc(String(val)))+'" style="width:96px;border:1px solid #c7cfda;border-radius:6px;padding:5px 6px;font-size:13px;text-align:center;font-family:inherit;">')
+          : '<span style="font-family:\'JetBrains Mono\',monospace;font-weight:600;color:#11202f;">'+fnum(val)+(val!==''&&val!=null&&f[2]?' <span style="color:#98a1ae;font-weight:400;">'+f[2]+'</span>':'')+'</span>';
+        return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f2f6;"><span style="font-size:13px;color:#586273;">'+f[1]+(f[2]?' ['+f[2]+']':'')+'</span>'+right+'</div>';
+      }).join('');
+      var toggle = e
+        ? '<span data-toggle="'+s.k+'" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:\'JetBrains Mono\',monospace;font-size:11px;font-weight:700;color:'+(son?'#0f8a4d':'#b23')+';"><span style="width:34px;height:18px;border-radius:999px;background:'+(son?'#0f8a4d':'#cdd4de')+';position:relative;display:inline-block;transition:.15s;"><span style="position:absolute;top:2px;left:'+(son?'18px':'2px')+';width:14px;height:14px;border-radius:50%;background:#fff;transition:.15s;"></span></span>'+(son?'ON':'OFF')+'</span>'
+        : '<span style="font-family:\'JetBrains Mono\',monospace;font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px;background:'+(son?'#e7f5ee':'#f0f2f6')+';color:'+(son?'#0f8a4d':'#98a1ae')+';">'+(son?'ON':'OFF')+'</span>';
+      return '<div style="border:1px solid #e7ebf1;border-left:4px solid '+(son?s.color:'#cdd4de')+';border-radius:12px;padding:2px 16px 8px;opacity:'+(son?'1':'.55')+';">'+
+        '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0 4px;border-bottom:1px solid #eef1f5;margin-bottom:2px;"><span style="font-family:\'Space Grotesk\',sans-serif;font-weight:600;font-size:14px;color:#11202f;">'+s.name+'</span>'+toggle+'</div>'+(son?rows:'')+'</div>';
+    }).join('');
+    var btns='';
+    if(isAdmin){
+      btns = e
+        ? '<span style="display:flex;align-items:center;gap:8px;"><div id="mccCancel" style="padding:7px 13px;border-radius:8px;border:1px solid #d7dee8;background:#fff;color:#586273;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;">Cancel</div><div id="mccSave" style="padding:7px 14px;border-radius:8px;background:#0f8a4d;color:#fff;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;">Save Changes</div></span>'
+        : '<div id="mccEdit" style="display:flex;align-items:center;gap:7px;padding:7px 13px;border-radius:8px;background:#0b56a4;color:#fff;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>Edit Parameters</div>';
+    }
+    var mfr=(mccRec&&mccRec.Relay_Manufacturer)?mccRec.Relay_Manufacturer:'—';
+    var model=(mccRec&&mccRec.Relay_Model)?mccRec.Relay_Model:'CEM11';
+    lsigCard.innerHTML=
+      '<div style="display:flex;align-items:flex-start;gap:14px;padding:20px 22px;border-bottom:1px solid #eff2f7;background:linear-gradient(180deg,#f7fafe,#fff);border-radius:16px 16px 0 0;">'+
+        '<div style="width:42px;height:42px;border-radius:11px;background:#e7f5ee;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="#16a34a" stroke-width="2"/><text x="12" y="16" text-anchor="middle" font-family="Space Grotesk,sans-serif" font-size="10" font-weight="700" fill="#16a34a">M</text></svg></div>'+
+        '<div style="flex:1;min-width:0;">'+(e?'<input id="mccNameI" value="'+esc(mccName||mccId)+'" style="width:100%;font-family:\'Space Grotesk\',sans-serif;font-size:18px;font-weight:700;color:#11202f;border:1px solid #c7cfda;border-radius:8px;padding:5px 9px;">':'<div style="font-family:\'Space Grotesk\',sans-serif;font-size:19px;font-weight:700;letter-spacing:-.01em;color:#11202f;">'+esc(mccName||mccId)+'</div>')+'<div style="font-family:\'JetBrains Mono\',monospace;font-size:11px;color:#98a1ae;letter-spacing:.04em;margin-top:4px;">Motor Protection · MCC (CEM11)</div></div>'+
+        '<div id="mccClose" style="width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#98a1ae;cursor:pointer;flex-shrink:0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"></line><line x1="18" y1="6" x2="6" y2="18"></line></svg></div>'+
+      '</div>'+
+      '<div style="display:flex;align-items:center;gap:22px;padding:13px 22px;border-bottom:1px solid #eff2f7;font-family:\'JetBrains Mono\',monospace;font-size:11px;">'+
+        '<div><span style="color:#98a1ae;">MFR </span><span style="color:#11202f;font-weight:600;">'+esc(mfr)+'</span></div>'+
+        '<div><span style="color:#98a1ae;">MODEL </span><span style="color:#11202f;font-weight:600;">'+esc(model)+'</span></div>'+
+        '<div style="flex:1;"></div>'+btns+
+      '</div>'+
+      '<div style="padding:18px 22px 22px;overflow-y:auto;">'+
+        '<div id="mccMsg" style="display:none;margin-bottom:12px;padding:9px 12px;border-radius:8px;font-size:13px;"></div>'+
+        '<div style="font-family:\'JetBrains Mono\',monospace;font-size:10.5px;letter-spacing:.1em;color:#0b56a4;font-weight:600;margin:0 0 10px;">CEM11 Protection Settings</div>'+
+        '<div style="margin-bottom:14px;border:1px solid #e7ebf1;border-radius:12px;padding:14px 14px 8px;background:#fff;"><div style="font-family:\'JetBrains Mono\',monospace;font-size:10.5px;letter-spacing:.1em;color:#dc2626;font-weight:600;margin-bottom:8px;">THERMAL OVERLOAD CURVE</div>'+buildMCCTCC(d)+'<div style="font-size:11px;color:#98a1ae;margin-top:6px;">เส้นแดง = Thermal overload (Trip Class '+fnum(d.TOL.cls)+', level '+fnum(d.TOL.lvl)+'%) + Stall</div></div>'+
+        '<div style="display:flex;align-items:center;justify-content:space-between;border:1px solid #e7ebf1;border-radius:12px;background:#f7fafe;padding:14px 16px;margin-bottom:12px;">'+
+          '<span style="font-family:\'Space Grotesk\',sans-serif;font-weight:600;font-size:14px;color:#11202f;">Full Load Current <span style="color:#98a1ae;font-weight:400;">In [A]</span></span>'+
+          (e?'<input data-sec="root" data-key="In" value="'+(d.In==null?'':esc(String(d.In)))+'" style="width:96px;border:1px solid #c7cfda;border-radius:6px;padding:5px 6px;font-size:13px;text-align:center;font-family:inherit;">':'<span style="font-family:\'JetBrains Mono\',monospace;font-weight:700;font-size:15px;color:#0b56a4;">'+fnum(d.In)+'</span>')+
+        '</div>'+
+        '<div style="display:flex;align-items:center;justify-content:space-between;border:1px solid #e7ebf1;border-radius:12px;background:#fff;padding:12px 16px;margin-bottom:14px;">'+
+          '<span style="font-family:\'Space Grotesk\',sans-serif;font-weight:600;font-size:14px;color:#11202f;">Tolerance <span style="color:#98a1ae;font-weight:400;">± %</span></span>'+
+          (e?'<input data-sec="root" data-key="tol" value="'+(d.tol==null?'':esc(String(d.tol)))+'" style="width:80px;border:1px solid #c7cfda;border-radius:6px;padding:5px 6px;font-size:13px;text-align:center;font-family:inherit;">':'<span style="font-family:\'JetBrains Mono\',monospace;font-weight:700;font-size:15px;color:#dc2626;">±'+fnum(d.tol)+'%</span>')+
+        '</div>'+
+        '<div style="display:grid;gap:12px;">'+cards+'</div>'+
+      '</div>';
+    document.getElementById('mccClose').onclick=function(){ lsigModal.style.display='none'; };
+    wireMCCTCC();
+    if(isAdmin && !e){ document.getElementById('mccEdit').onclick=function(){ mccEditing=true; renderMCC(); }; }
+    if(isAdmin && e){
+      document.getElementById('mccCancel').onclick=function(){ mccEditing=false; mccData=parseMCC(mccRec); renderMCC(); };
+      document.getElementById('mccSave').onclick=saveMCC;
+      Array.prototype.forEach.call(lsigCard.querySelectorAll('[data-toggle]'),function(el){
+        el.onclick=function(){ var k=el.getAttribute('data-toggle');
+          // capture currently-visible inputs before re-render
+          lsigCard.querySelectorAll('[data-sec]').forEach(function(x){ var sc=x.getAttribute('data-sec'),ky=x.getAttribute('data-key'); if(sc==='root') mccData[ky]=x.value; else if(mccData[sc]) mccData[sc][ky]=x.value; });
+          mccData[k].on = (mccData[k].on===false); renderMCC();
+        };
+      });
+    }
+  }
+  function saveMCC(){
+    var msg=document.getElementById('mccMsg');
+    var nameEl=document.getElementById('mccNameI'); if(nameEl) mccName=nameEl.value.trim()||mccId;
+    var d=blankMCC(); Object.keys(mccData).forEach(function(k){ if(typeof mccData[k]!=='object') d[k]=mccData[k]; });
+    lsigCard.querySelectorAll('[data-sec]').forEach(function(el){ var sec=el.getAttribute('data-sec'), key=el.getAttribute('data-key'); if(sec==='root') d[key]=el.value; else if(d[sec]) d[sec][key]=el.value; });
+    mccData=d;
+    var body={ Remark: JSON.stringify({ __mcc:d, __name:mccName }) };
+    msg.style.display='block'; msg.style.background='#fff7e6'; msg.style.color='#8a5a00'; msg.textContent='กำลังบันทึก…';
+    fetch(API+'/'+encodeURIComponent(mccId),{method:'PUT',headers:{'Content-Type':'application/json',Authorization:'Bearer '+tok()},body:JSON.stringify(body)})
+      .then(function(r){ return r.text().then(function(t){ return {st:r.status,t:t}; }); })
+      .then(function(res){
+        if(res.st>=200&&res.st<300){ msg.style.background='#e7f7ec'; msg.style.color='#1a7a3d'; msg.textContent='บันทึกสำเร็จ'; addEditLog('EDIT',mccId,'MCC settings'); mccEditing=false; if(mccRec)mccRec.Remark=body.Remark; if(_relayCache){var rc=_relayCache.find(function(x){return x.Relay_ID===mccId;}); if(rc)rc.Remark=body.Remark;} renderMCC(); }
+        else { msg.style.background='#fdeaea'; msg.style.color='#b23'; msg.textContent='บันทึกไม่สำเร็จ ('+res.st+')'; }
+      }).catch(function(e){ msg.style.background='#fdeaea'; msg.style.color='#b23'; msg.textContent='ผิดพลาด: '+e; });
+  }
+  function openMCC(id){
+    mccId=id; mccName=id; mccEditing=false; mccRec=null; mccData=blankMCC();
+    lsigModal.style.display='flex';
+    lsigCard.innerHTML='<div style="padding:40px;text-align:center;color:#5a6675;font-family:\'Plus Jakarta Sans\',sans-serif;">กำลังโหลด…</div>';
+    function apply(list){ var rec=list&&list.find?list.find(function(x){return x.Relay_ID===id;}):null; mccRec=rec||null; mccData=parseMCC(mccRec); mccName=parseName(mccRec)||id; renderMCC(); }
+    if(_relayCache){ apply(_relayCache); }
+    fetch(API,{headers:{Authorization:'Bearer '+tok()}})
+      .then(function(r){ return r.ok?r.json():null; })
+      .then(function(j){ _relayCache=(j&&j.data)?j.data:(Array.isArray(j)?j:[]); apply(_relayCache); })
+      .catch(function(){ if(!_relayCache) renderMCC(); });
+  }
+  var _relayCache=null;
+  function openRelay(id){
+    curId=id; curName=id; editing=false; curRec=null; curLSIG=blankLSIG();
+    lsigModal.style.display='flex';
+    lsigCard.innerHTML='<div style="padding:40px;text-align:center;color:#5a6675;font-family:\'Plus Jakarta Sans\',sans-serif;">กำลังโหลด…</div>';
+    function apply(list){
+      var rec=list&&list.find?list.find(function(x){return x.Relay_ID===id;}):null;
+      curRec=rec||null; curLSIG=parseLSIG(curRec); curName=parseName(curRec)||id; renderLSIG();
+    }
+    if(_relayCache){ apply(_relayCache); }
+    fetch(API,{headers:{Authorization:'Bearer '+tok()}})
+      .then(function(r){ return r.ok?r.json():null; })
+      .then(function(j){ _relayCache=(j&&j.data)?j.data:(Array.isArray(j)?j:[]); apply(_relayCache); })
+      .catch(function(){ if(!_relayCache) renderLSIG(); });
   }
   // ---- ① 380V FEEDER hexagon → table panel ----
   var FEEDERS=[["3601-1MOV106","2.2",""],["3601-1MOV107","2.2",""],["3601-1MOV084","4.4",""],["3601-1MOV085","4.4",""],["3601-1MOV100","5.1",""],["3601-1MOV101","5.1",""],["3601-1MOV102","3.4",""],["3601-1MOV103","3.4",""],["3601-1MOV104","14",""],["3601-1MOV105","14",""],["3601-1MOV110","2.1",""],["3601-1MOV111","2.1",""],["3601-1MOV108","4.2",""],["3601-1MOV109","4.2",""],["3603MOV01","14",""],["3603MOV03","7.6",""],["3606MOV001","15",""],["3606MOV003","15",""],["3608F001YM02","3.0",""],["3608F002AYM01","3.7",""],["3608F002BH01","60",""],["3608F002BYM02","3",""],["3608MOV01","7.6",""],["3608MOV03","7.8",""],["3608MOV05","7.6",""],["3608MOV07","7.6",""],["3628WR41","",""],["3628WR43","",""],["3628WR45","",""],["3628WR47","",""],["3628WR49","",""],["3628WR51","",""],["SPARE","","30"],["SPARE","","30"],["SPARE","","30"],["SPARE","","30"],["SPARE","","30"],["SPARE","","30"],["SPARE","","30"],["SPARE","","30"],["SPARE","","30"],["SPARE","","30"]];
@@ -160,7 +528,7 @@
       '</div>';
     document.getElementById('fClose').onclick=function(){ fModal.style.display='none'; };
     Array.prototype.forEach.call(fPanel.querySelectorAll('.fRelay'),function(el){
-      el.addEventListener('click',function(){ openRelay(el.getAttribute('data-id')); });
+      el.addEventListener('click',function(){ openMCC(el.getAttribute('data-id')); });
     });
   }
   fModal.addEventListener('click',function(e){ if(e.target===fModal) fModal.style.display='none'; });
@@ -217,7 +585,7 @@
       '</div>';
     document.getElementById('mClose').onclick=function(){ mModal.style.display='none'; };
     Array.prototype.forEach.call(mPanel.querySelectorAll('.mRelay'),function(el){
-      el.addEventListener('click',function(){ openRelay(el.getAttribute('data-id')); });
+      el.addEventListener('click',function(){ openMCC(el.getAttribute('data-id')); });
     });
   }
   mModal.addEventListener('click',function(e){ if(e.target===mModal) mModal.style.display='none'; });
@@ -272,7 +640,7 @@
       '</div>';
     document.getElementById('m3Close').onclick=function(){ m3Modal.style.display='none'; };
     Array.prototype.forEach.call(m3Panel.querySelectorAll('.m3Relay'),function(el){
-      el.addEventListener('click',function(){ openRelay(el.getAttribute('data-id')); });
+      el.addEventListener('click',function(){ openMCC(el.getAttribute('data-id')); });
     });
   }
   m3Modal.addEventListener('click',function(e){ if(e.target===m3Modal) m3Modal.style.display='none'; });
@@ -329,7 +697,7 @@
       '</div>';
     document.getElementById('m4Close').onclick=function(){ m4Modal.style.display='none'; };
     Array.prototype.forEach.call(m4Panel.querySelectorAll('.m4Relay'),function(el){
-      el.addEventListener('click',function(){ openRelay(el.getAttribute('data-id')); });
+      el.addEventListener('click',function(){ openMCC(el.getAttribute('data-id')); });
     });
   }
   m4Modal.addEventListener('click',function(e){ if(e.target===m4Modal) m4Modal.style.display='none'; });
@@ -386,7 +754,7 @@
       '</div>';
     document.getElementById('m5Close').onclick=function(){ m5Modal.style.display='none'; };
     Array.prototype.forEach.call(m5Panel.querySelectorAll('.m5Relay'),function(el){
-      el.addEventListener('click',function(){ openRelay(el.getAttribute('data-id')); });
+      el.addEventListener('click',function(){ openMCC(el.getAttribute('data-id')); });
     });
   }
   m5Modal.addEventListener('click',function(e){ if(e.target===m5Modal) m5Modal.style.display='none'; });
@@ -443,7 +811,7 @@
       '</div>';
     document.getElementById('f6Close').onclick=function(){ f6Modal.style.display='none'; };
     Array.prototype.forEach.call(f6Panel.querySelectorAll('.f6Relay'),function(el){
-      el.addEventListener('click',function(){ openRelay(el.getAttribute('data-id')); });
+      el.addEventListener('click',function(){ openMCC(el.getAttribute('data-id')); });
     });
   }
   f6Modal.addEventListener('click',function(e){ if(e.target===f6Modal) f6Modal.style.display='none'; });
@@ -510,13 +878,13 @@
       '</div>';
     document.getElementById('dcClose').onclick=function(){ dcModal.style.display='none'; };
     Array.prototype.forEach.call(dcPanel.querySelectorAll('.dcRelay'),function(el){
-      el.addEventListener('click',function(){ openRelay(el.getAttribute('data-id')); });
+      el.addEventListener('click',function(){ openMCC(el.getAttribute('data-id')); });
     });
   }
   dcModal.addEventListener('click',function(e){ if(e.target===dcModal) dcModal.style.display='none'; });
   (function(){
     // ① hexagon markers next to "CRITICAL USER (FOR GTG CONTROL)" labels (hexagon sits left of text)
-    var spots=[[507,484,106,32,2],[619,484,106,32,2],[736,484,106,32,2],[856,484,106,32,2],[967,484,106,32,2],[972,286,108,18,1]];
+    var spots=[[967,484,106,32,2],[972,286,108,18,1]];
     spots.forEach(function(s){
       var dset=s[4]||1;
       var g=document.createElementNS('http://www.w3.org/2000/svg','g');
@@ -531,6 +899,503 @@
       g.appendChild(rc); g.appendChild(ti); ov.appendChild(g);
     });
   })();
+  // ---- ③ AC 220V FEEDERS hexagon → table panel ----
+  var AC220={title:'AC 220V FEEDERS', sub:'CRITICAL USER (FOR GTG CONTROL)', total:'12.15',
+    feeders:[["1","AC UPS POWER FOR GCPP","32","5"],["2","AC UPS POWER FOR PMS","32","3.85"],["3","AC UPS POWER FOR C&S","32","3.3"],["4","SPARE","32",""],["5","SPARE","32",""],["6","SPARE","32",""],["7","SPARE","32",""],["8","SPARE","16",""],["9","SPARE","16",""],["10","SPARE","16",""]]};
+  var acModal=document.createElement('div'); acModal.style.cssText='display:none;position:fixed;inset:0;z-index:90;background:rgba(8,20,38,.35);';
+  var acPanel=document.createElement('div'); acPanel.style.cssText='position:absolute;top:0;right:0;height:100%;width:440px;max-width:92vw;background:#f3f6fa;box-shadow:-8px 0 30px rgba(10,30,60,.22);display:flex;flex-direction:column;';
+  acModal.appendChild(acPanel); document.body.appendChild(acModal);
+  function buildAC220Panel(){
+    var set=AC220;
+    var rows=set.feeders.map(function(f,i){
+      var spare=/SPARE/i.test(f[1]);
+      var bg=spare?'#eef1f5':(i%2?'#f7f9fc':'#fff');
+      var rid='3628SW02-AC220-F'+('0'+f[0]).slice(-2);
+      var noCell=spare
+        ? '<td style="padding:6px 10px;border-bottom:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:600;color:#8a94a3;">'+esc(f[0])+'</td>'
+        : '<td class="acRelay" data-id="'+esc(rid)+'" style="padding:6px 10px;border-bottom:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:700;color:#0b56a4;text-decoration:underline;cursor:pointer;">'+esc(f[0])+'</td>';
+      return '<tr style="background:'+bg+';">'+
+        noCell+
+        '<td style="padding:6px 12px;border-bottom:1px solid #e3e8ef;border-left:1px solid #e3e8ef;font-family:\'JetBrains Mono\',monospace;font-size:11.5px;'+(spare?'color:#8a94a3;font-style:italic;':'color:#11202f;')+'">'+esc(f[1])+'</td>'+
+        '<td style="padding:6px 8px;border-bottom:1px solid #e3e8ef;border-left:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;color:#11202f;">'+esc(f[2])+'</td>'+
+        '<td style="padding:6px 8px;border-bottom:1px solid #e3e8ef;border-left:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:600;color:#0b56a4;background:'+(f[3]?'rgba(11,86,164,.06)':'transparent')+';">'+esc(f[3])+'</td>'+
+      '</tr>';
+    }).join('');
+    acPanel.innerHTML=
+      '<div style="background:linear-gradient(180deg,#0b4f95,#003d7c);color:#fff;padding:16px 20px;display:flex;align-items:center;gap:13px;flex-shrink:0;">'+
+        '<div style="width:34px;height:34px;flex-shrink:0;">'+
+          '<svg width="34" height="34" viewBox="0 0 34 34"><polygon points="9,3 25,3 33,17 25,31 9,31 1,17" fill="rgba(255,255,255,.14)" stroke="#cfe0f5" stroke-width="1.5"/><text x="17" y="22" text-anchor="middle" font-family="Space Grotesk,sans-serif" font-size="15" font-weight="700" fill="#fff">3</text></svg>'+
+        '</div>'+
+        '<div style="flex:1;min-width:0;"><div style="font-family:\'Space Grotesk\',sans-serif;font-size:18px;font-weight:700;letter-spacing:-.01em;">AC 220V FEEDERS</div>'+
+        '<div style="font-size:11.5px;color:#bcd4ef;font-weight:500;margin-top:1px;">'+set.sub+' · '+set.feeders.length+' items</div></div>'+
+        '<button id="acClose" style="width:30px;height:30px;border:none;border-radius:8px;background:rgba(255,255,255,.16);color:#fff;font-size:17px;cursor:pointer;flex-shrink:0;">&times;</button>'+
+      '</div>'+
+      '<div style="flex:1;overflow-y:auto;padding:14px;">'+
+        '<div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 3px 14px rgba(10,30,60,.08);border:1px solid #e3e8ef;">'+
+          '<table style="width:100%;border-collapse:collapse;">'+
+            '<thead><tr style="background:#11202f;color:#fff;">'+
+              '<th style="padding:9px 10px;text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:11px;letter-spacing:.02em;">FEEDER<br>NO.</th>'+
+              '<th style="padding:9px 12px;text-align:left;font-family:\'Space Grotesk\',sans-serif;font-size:11px;letter-spacing:.02em;border-left:1px solid #2c3e52;">FEEDER DESCRIPTION</th>'+
+              '<th style="padding:9px 8px;text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:11px;letter-spacing:.02em;border-left:1px solid #2c3e52;">MCCB<br>RATING(A)</th>'+
+              '<th style="padding:9px 8px;text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:11px;letter-spacing:.02em;border-left:1px solid #2c3e52;">RATING<br>(kVA)</th>'+
+            '</tr></thead><tbody>'+rows+
+            '<tr style="background:#dde5ef;font-weight:700;"><td colspan="3" style="padding:8px 12px;text-align:right;font-family:\'Space Grotesk\',sans-serif;font-size:12px;color:#11202f;">TOTAL</td>'+
+            '<td style="padding:8px;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;color:#0b56a4;border-left:1px solid #c4d0de;">'+set.total+'</td></tr>'+
+            '</tbody>'+
+          '</table>'+
+        '</div>'+
+      '</div>';
+    document.getElementById('acClose').onclick=function(){ acModal.style.display='none'; };
+    Array.prototype.forEach.call(acPanel.querySelectorAll('.acRelay'),function(el){
+      el.addEventListener('click',function(){ openMCC(el.getAttribute('data-id')); });
+    });
+  }
+  acModal.addEventListener('click',function(e){ if(e.target===acModal) acModal.style.display='none'; });
+  (function(){
+    var g=document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.style.cursor='pointer';
+    var rc=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    rc.setAttribute('x',843);rc.setAttribute('y',495);rc.setAttribute('width',116);rc.setAttribute('height',20);
+    rc.setAttribute('rx','3');rc.setAttribute('fill','rgba(37,99,235,0)');rc.setAttribute('stroke','none');
+    rc.onmouseenter=function(){rc.setAttribute('fill','rgba(37,99,235,.28)');rc.setAttribute('stroke','#2563eb');rc.setAttribute('stroke-width','1.4');};
+    rc.onmouseleave=function(){rc.setAttribute('fill','rgba(37,99,235,0)');rc.setAttribute('stroke','none');};
+    var ti=document.createElementNS('http://www.w3.org/2000/svg','title'); ti.textContent='AC 220V FEEDERS';
+    g.addEventListener('click',function(e){ e.preventDefault(); e.stopPropagation(); if(!moved){ buildAC220Panel(); acModal.style.display='block'; } });
+    g.appendChild(rc); g.appendChild(ti); ov.appendChild(g);
+  })();
+  // ---- ④ AC 220V FEEDERS (FOR GTG CONTROL) hexagon → table panel ----
+  var AC220B={title:'AC 220V FEEDERS', sub:'CRITICAL USER (FOR GTG CONTROL)', total:'12.15',
+    feeders:[["1","AC UPS POWER FOR GCPP","32","5"],["2","AC UPS POWER FOR PMS","32","3.85"],["3","AC UPS POWER FOR C&S","32","3.3"],["4","SPARE","32",""],["5","SPARE","32",""],["6","SPARE","32",""],["7","SPARE","32",""],["8","SPARE","16",""],["9","SPARE","16",""],["10","SPARE","16",""]]};
+  var acbModal=document.createElement('div'); acbModal.style.cssText='display:none;position:fixed;inset:0;z-index:90;background:rgba(8,20,38,.35);';
+  var acbPanel=document.createElement('div'); acbPanel.style.cssText='position:absolute;top:0;right:0;height:100%;width:440px;max-width:92vw;background:#f3f6fa;box-shadow:-8px 0 30px rgba(10,30,60,.22);display:flex;flex-direction:column;';
+  acbModal.appendChild(acbPanel); document.body.appendChild(acbModal);
+  function buildAC220BPanel(){
+    var set=AC220B;
+    var rows=set.feeders.map(function(f,i){
+      var spare=/SPARE/i.test(f[1]);
+      var bg=spare?'#eef1f5':(i%2?'#f7f9fc':'#fff');
+      var rid='3628SW02-AC220-4-F'+('0'+f[0]).slice(-2);
+      var noCell=spare
+        ? '<td style="padding:6px 10px;border-bottom:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:600;color:#8a94a3;">'+esc(f[0])+'</td>'
+        : '<td class="acbRelay" data-id="'+esc(rid)+'" style="padding:6px 10px;border-bottom:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:700;color:#0b56a4;text-decoration:underline;cursor:pointer;">'+esc(f[0])+'</td>';
+      return '<tr style="background:'+bg+';">'+
+        noCell+
+        '<td style="padding:6px 12px;border-bottom:1px solid #e3e8ef;border-left:1px solid #e3e8ef;font-family:\'JetBrains Mono\',monospace;font-size:11.5px;'+(spare?'color:#8a94a3;font-style:italic;':'color:#11202f;')+'">'+esc(f[1])+'</td>'+
+        '<td style="padding:6px 8px;border-bottom:1px solid #e3e8ef;border-left:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;color:#11202f;">'+esc(f[2])+'</td>'+
+        '<td style="padding:6px 8px;border-bottom:1px solid #e3e8ef;border-left:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:600;color:#0b56a4;background:'+(f[3]?'rgba(11,86,164,.06)':'transparent')+';">'+esc(f[3])+'</td>'+
+      '</tr>';
+    }).join('');
+    acbPanel.innerHTML=
+      '<div style="background:linear-gradient(180deg,#0b4f95,#003d7c);color:#fff;padding:16px 20px;display:flex;align-items:center;gap:13px;flex-shrink:0;">'+
+        '<div style="width:34px;height:34px;flex-shrink:0;">'+
+          '<svg width="34" height="34" viewBox="0 0 34 34"><polygon points="9,3 25,3 33,17 25,31 9,31 1,17" fill="rgba(255,255,255,.14)" stroke="#cfe0f5" stroke-width="1.5"/><text x="17" y="22" text-anchor="middle" font-family="Space Grotesk,sans-serif" font-size="15" font-weight="700" fill="#fff">4</text></svg>'+
+        '</div>'+
+        '<div style="flex:1;min-width:0;"><div style="font-family:\'Space Grotesk\',sans-serif;font-size:18px;font-weight:700;letter-spacing:-.01em;">AC 220V FEEDERS</div>'+
+        '<div style="font-size:11.5px;color:#bcd4ef;font-weight:500;margin-top:1px;">'+set.sub+' · '+set.feeders.length+' items</div></div>'+
+        '<button id="acbClose" style="width:30px;height:30px;border:none;border-radius:8px;background:rgba(255,255,255,.16);color:#fff;font-size:17px;cursor:pointer;flex-shrink:0;">&times;</button>'+
+      '</div>'+
+      '<div style="flex:1;overflow-y:auto;padding:14px;">'+
+        '<div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 3px 14px rgba(10,30,60,.08);border:1px solid #e3e8ef;">'+
+          '<table style="width:100%;border-collapse:collapse;">'+
+            '<thead><tr style="background:#11202f;color:#fff;">'+
+              '<th style="padding:9px 10px;text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:11px;letter-spacing:.02em;">FEEDER<br>NO.</th>'+
+              '<th style="padding:9px 12px;text-align:left;font-family:\'Space Grotesk\',sans-serif;font-size:11px;letter-spacing:.02em;border-left:1px solid #2c3e52;">FEEDER DESCRIPTION</th>'+
+              '<th style="padding:9px 8px;text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:11px;letter-spacing:.02em;border-left:1px solid #2c3e52;">MCCB<br>RATING(A)</th>'+
+              '<th style="padding:9px 8px;text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:11px;letter-spacing:.02em;border-left:1px solid #2c3e52;">RATING<br>(kVA)</th>'+
+            '</tr></thead><tbody>'+rows+
+            '<tr style="background:#dde5ef;font-weight:700;"><td colspan="3" style="padding:8px 12px;text-align:right;font-family:\'Space Grotesk\',sans-serif;font-size:12px;color:#11202f;">TOTAL</td>'+
+            '<td style="padding:8px;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;color:#0b56a4;border-left:1px solid #c4d0de;">'+set.total+'</td></tr>'+
+            '</tbody>'+
+          '</table>'+
+        '</div>'+
+      '</div>';
+    document.getElementById('acbClose').onclick=function(){ acbModal.style.display='none'; };
+    Array.prototype.forEach.call(acbPanel.querySelectorAll('.acbRelay'),function(el){
+      el.addEventListener('click',function(){ openMCC(el.getAttribute('data-id')); });
+    });
+  }
+  acbModal.addEventListener('click',function(e){ if(e.target===acbModal) acbModal.style.display='none'; });
+  (function(){
+    var g=document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.style.cursor='pointer';
+    var rc=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    rc.setAttribute('x',743);rc.setAttribute('y',495);rc.setAttribute('width',116);rc.setAttribute('height',20);
+    rc.setAttribute('rx','3');rc.setAttribute('fill','rgba(37,99,235,0)');rc.setAttribute('stroke','none');
+    rc.onmouseenter=function(){rc.setAttribute('fill','rgba(37,99,235,.28)');rc.setAttribute('stroke','#2563eb');rc.setAttribute('stroke-width','1.4');};
+    rc.onmouseleave=function(){rc.setAttribute('fill','rgba(37,99,235,0)');rc.setAttribute('stroke','none');};
+    var ti=document.createElementNS('http://www.w3.org/2000/svg','title'); ti.textContent='AC 220V FEEDERS (4)';
+    g.addEventListener('click',function(e){ e.preventDefault(); e.stopPropagation(); if(!moved){ buildAC220BPanel(); acbModal.style.display='block'; } });
+    g.appendChild(rc); g.appendChild(ti); ov.appendChild(g);
+  })();
+  // ---- ⑤ AC 220V FEEDERS hexagon → table panel ----
+  var AC220C={title:'AC 220V FEEDERS', sub:'CRITICAL USER (FOR GTG CONTROL)', total:'86', num:'5',
+    feeders:[["1","AC UPS POWER FOR DCS IN GSP6 S/S","400","64"],["2","AC UPS POWER FOR DCS IN GSP5 CCR","63","11"],["3","AC UPS POWER FOR IRP IN GSP6 S/S","63","11"],["4","SPARE","400",""],["5","SPARE","250",""],["6","SPARE","250",""],["7","SPARE","63",""],["8","SPARE","32",""],["9","SPARE","32",""],["10","SPARE","32",""],["11","SPARE","80",""],["12","SPARE","80",""]]};
+  var accModal=document.createElement('div'); accModal.style.cssText='display:none;position:fixed;inset:0;z-index:90;background:rgba(8,20,38,.35);';
+  var accPanel=document.createElement('div'); accPanel.style.cssText='position:absolute;top:0;right:0;height:100%;width:440px;max-width:92vw;background:#f3f6fa;box-shadow:-8px 0 30px rgba(10,30,60,.22);display:flex;flex-direction:column;';
+  accModal.appendChild(accPanel); document.body.appendChild(accModal);
+  function buildAC220CPanel(){
+    var set=AC220C;
+    var rows=set.feeders.map(function(f,i){
+      var spare=/SPARE/i.test(f[1]);
+      var bg=spare?'#eef1f5':(i%2?'#f7f9fc':'#fff');
+      var rid='3628SW02-AC220-5-F'+('0'+f[0]).slice(-2);
+      var noCell=spare
+        ? '<td style="padding:6px 10px;border-bottom:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:600;color:#8a94a3;">'+esc(f[0])+'</td>'
+        : '<td class="accRelay" data-id="'+esc(rid)+'" style="padding:6px 10px;border-bottom:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:700;color:#0b56a4;text-decoration:underline;cursor:pointer;">'+esc(f[0])+'</td>';
+      return '<tr style="background:'+bg+';">'+
+        noCell+
+        '<td style="padding:6px 12px;border-bottom:1px solid #e3e8ef;border-left:1px solid #e3e8ef;font-family:\'JetBrains Mono\',monospace;font-size:11.5px;'+(spare?'color:#8a94a3;font-style:italic;':'color:#11202f;')+'">'+esc(f[1])+'</td>'+
+        '<td style="padding:6px 8px;border-bottom:1px solid #e3e8ef;border-left:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;color:#11202f;">'+esc(f[2])+'</td>'+
+        '<td style="padding:6px 8px;border-bottom:1px solid #e3e8ef;border-left:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:600;color:#0b56a4;background:'+(f[3]?'rgba(11,86,164,.06)':'transparent')+';">'+esc(f[3])+'</td>'+
+      '</tr>';
+    }).join('');
+    accPanel.innerHTML=
+      '<div style="background:linear-gradient(180deg,#0b4f95,#003d7c);color:#fff;padding:16px 20px;display:flex;align-items:center;gap:13px;flex-shrink:0;">'+
+        '<div style="width:34px;height:34px;flex-shrink:0;">'+
+          '<svg width="34" height="34" viewBox="0 0 34 34"><polygon points="9,3 25,3 33,17 25,31 9,31 1,17" fill="rgba(255,255,255,.14)" stroke="#cfe0f5" stroke-width="1.5"/><text x="17" y="22" text-anchor="middle" font-family="Space Grotesk,sans-serif" font-size="15" font-weight="700" fill="#fff">5</text></svg>'+
+        '</div>'+
+        '<div style="flex:1;min-width:0;"><div style="font-family:\'Space Grotesk\',sans-serif;font-size:18px;font-weight:700;letter-spacing:-.01em;">AC 220V FEEDERS</div>'+
+        '<div style="font-size:11.5px;color:#bcd4ef;font-weight:500;margin-top:1px;">'+set.sub+' · '+set.feeders.length+' items</div></div>'+
+        '<button id="accClose" style="width:30px;height:30px;border:none;border-radius:8px;background:rgba(255,255,255,.16);color:#fff;font-size:17px;cursor:pointer;flex-shrink:0;">&times;</button>'+
+      '</div>'+
+      '<div style="flex:1;overflow-y:auto;padding:14px;">'+
+        '<div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 3px 14px rgba(10,30,60,.08);border:1px solid #e3e8ef;">'+
+          '<table style="width:100%;border-collapse:collapse;">'+
+            '<thead><tr style="background:#11202f;color:#fff;">'+
+              '<th style="padding:9px 10px;text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:11px;letter-spacing:.02em;">FEEDER<br>NO.</th>'+
+              '<th style="padding:9px 12px;text-align:left;font-family:\'Space Grotesk\',sans-serif;font-size:11px;letter-spacing:.02em;border-left:1px solid #2c3e52;">FEEDER DESCRIPTION</th>'+
+              '<th style="padding:9px 8px;text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:11px;letter-spacing:.02em;border-left:1px solid #2c3e52;">MCCB<br>RATING(A)</th>'+
+              '<th style="padding:9px 8px;text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:11px;letter-spacing:.02em;border-left:1px solid #2c3e52;">RATING<br>(kVA)</th>'+
+            '</tr></thead><tbody>'+rows+
+            '<tr style="background:#dde5ef;font-weight:700;"><td colspan="3" style="padding:8px 12px;text-align:right;font-family:\'Space Grotesk\',sans-serif;font-size:12px;color:#11202f;">TOTAL</td>'+
+            '<td style="padding:8px;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;color:#0b56a4;border-left:1px solid #c4d0de;">'+set.total+'</td></tr>'+
+            '</tbody>'+
+          '</table>'+
+        '</div>'+
+      '</div>';
+    document.getElementById('accClose').onclick=function(){ accModal.style.display='none'; };
+    Array.prototype.forEach.call(accPanel.querySelectorAll('.accRelay'),function(el){
+      el.addEventListener('click',function(){ openMCC(el.getAttribute('data-id')); });
+    });
+  }
+  accModal.addEventListener('click',function(e){ if(e.target===accModal) accModal.style.display='none'; });
+  (function(){
+    var g=document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.style.cursor='pointer';
+    var rc=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    rc.setAttribute('x',619);rc.setAttribute('y',495);rc.setAttribute('width',116);rc.setAttribute('height',20);
+    rc.setAttribute('rx','3');rc.setAttribute('fill','rgba(37,99,235,0)');rc.setAttribute('stroke','none');
+    rc.onmouseenter=function(){rc.setAttribute('fill','rgba(37,99,235,.28)');rc.setAttribute('stroke','#2563eb');rc.setAttribute('stroke-width','1.4');};
+    rc.onmouseleave=function(){rc.setAttribute('fill','rgba(37,99,235,0)');rc.setAttribute('stroke','none');};
+    var ti=document.createElementNS('http://www.w3.org/2000/svg','title'); ti.textContent='AC 220V FEEDERS (5)';
+    g.addEventListener('click',function(e){ e.preventDefault(); e.stopPropagation(); if(!moved){ buildAC220CPanel(); accModal.style.display='block'; } });
+    g.appendChild(rc); g.appendChild(ti); ov.appendChild(g);
+  })();
+  // ---- ⑥ AC 220V FEEDERS hexagon → table panel ----
+  var AC220D={title:'AC 220V FEEDERS', sub:'CRITICAL USER (FOR GTG CONTROL)', total:'86',
+    feeders:[["1","AC UPS POWER FOR DCS IN GSP6 S/S","400","64"],["2","AC UPS POWER FOR DCS IN GSP5 CCR","63","11"],["3","AC UPS POWER FOR IRP IN GSP6 S/S","63","11"],["4","SPARE","400",""],["5","SPARE","250",""],["6","SPARE","250",""],["7","SPARE","63",""],["8","SPARE","32",""],["9","SPARE","32",""],["10","SPARE","32",""],["11","SPARE","80",""],["12","SPARE","80",""]]};
+  var acdModal=document.createElement('div'); acdModal.style.cssText='display:none;position:fixed;inset:0;z-index:90;background:rgba(8,20,38,.35);';
+  var acdPanel=document.createElement('div'); acdPanel.style.cssText='position:absolute;top:0;right:0;height:100%;width:440px;max-width:92vw;background:#f3f6fa;box-shadow:-8px 0 30px rgba(10,30,60,.22);display:flex;flex-direction:column;';
+  acdModal.appendChild(acdPanel); document.body.appendChild(acdModal);
+  function buildAC220DPanel(){
+    var set=AC220D;
+    var rows=set.feeders.map(function(f,i){
+      var spare=/SPARE/i.test(f[1]);
+      var bg=spare?'#eef1f5':(i%2?'#f7f9fc':'#fff');
+      var rid='3628SW02-AC220-6-F'+('0'+f[0]).slice(-2);
+      var noCell=spare
+        ? '<td style="padding:6px 10px;border-bottom:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:600;color:#8a94a3;">'+esc(f[0])+'</td>'
+        : '<td class="acdRelay" data-id="'+esc(rid)+'" style="padding:6px 10px;border-bottom:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:700;color:#0b56a4;text-decoration:underline;cursor:pointer;">'+esc(f[0])+'</td>';
+      return '<tr style="background:'+bg+';">'+
+        noCell+
+        '<td style="padding:6px 12px;border-bottom:1px solid #e3e8ef;border-left:1px solid #e3e8ef;font-family:\'JetBrains Mono\',monospace;font-size:11.5px;'+(spare?'color:#8a94a3;font-style:italic;':'color:#11202f;')+'">'+esc(f[1])+'</td>'+
+        '<td style="padding:6px 8px;border-bottom:1px solid #e3e8ef;border-left:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;color:#11202f;">'+esc(f[2])+'</td>'+
+        '<td style="padding:6px 8px;border-bottom:1px solid #e3e8ef;border-left:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:600;color:#0b56a4;background:'+(f[3]?'rgba(11,86,164,.06)':'transparent')+';">'+esc(f[3])+'</td>'+
+      '</tr>';
+    }).join('');
+    acdPanel.innerHTML=
+      '<div style="background:linear-gradient(180deg,#0b4f95,#003d7c);color:#fff;padding:16px 20px;display:flex;align-items:center;gap:13px;flex-shrink:0;">'+
+        '<div style="width:34px;height:34px;flex-shrink:0;">'+
+          '<svg width="34" height="34" viewBox="0 0 34 34"><polygon points="9,3 25,3 33,17 25,31 9,31 1,17" fill="rgba(255,255,255,.14)" stroke="#cfe0f5" stroke-width="1.5"/><text x="17" y="22" text-anchor="middle" font-family="Space Grotesk,sans-serif" font-size="15" font-weight="700" fill="#fff">6</text></svg>'+
+        '</div>'+
+        '<div style="flex:1;min-width:0;"><div style="font-family:\'Space Grotesk\',sans-serif;font-size:18px;font-weight:700;letter-spacing:-.01em;">AC 220V FEEDERS</div>'+
+        '<div style="font-size:11.5px;color:#bcd4ef;font-weight:500;margin-top:1px;">'+set.sub+' · '+set.feeders.length+' items</div></div>'+
+        '<button id="acdClose" style="width:30px;height:30px;border:none;border-radius:8px;background:rgba(255,255,255,.16);color:#fff;font-size:17px;cursor:pointer;flex-shrink:0;">&times;</button>'+
+      '</div>'+
+      '<div style="flex:1;overflow-y:auto;padding:14px;">'+
+        '<div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 3px 14px rgba(10,30,60,.08);border:1px solid #e3e8ef;">'+
+          '<table style="width:100%;border-collapse:collapse;">'+
+            '<thead><tr style="background:#11202f;color:#fff;">'+
+              '<th style="padding:9px 10px;text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:11px;letter-spacing:.02em;">FEEDER<br>NO.</th>'+
+              '<th style="padding:9px 12px;text-align:left;font-family:\'Space Grotesk\',sans-serif;font-size:11px;letter-spacing:.02em;border-left:1px solid #2c3e52;">FEEDER DESCRIPTION</th>'+
+              '<th style="padding:9px 8px;text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:11px;letter-spacing:.02em;border-left:1px solid #2c3e52;">MCCB<br>RATING(A)</th>'+
+              '<th style="padding:9px 8px;text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:11px;letter-spacing:.02em;border-left:1px solid #2c3e52;">RATING<br>(kVA)</th>'+
+            '</tr></thead><tbody>'+rows+
+            '<tr style="background:#dde5ef;font-weight:700;"><td colspan="3" style="padding:8px 12px;text-align:right;font-family:\'Space Grotesk\',sans-serif;font-size:12px;color:#11202f;">TOTAL</td>'+
+            '<td style="padding:8px;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;color:#0b56a4;border-left:1px solid #c4d0de;">'+set.total+'</td></tr>'+
+            '</tbody>'+
+          '</table>'+
+        '</div>'+
+      '</div>';
+    document.getElementById('acdClose').onclick=function(){ acdModal.style.display='none'; };
+    Array.prototype.forEach.call(acdPanel.querySelectorAll('.acdRelay'),function(el){
+      el.addEventListener('click',function(){ openMCC(el.getAttribute('data-id')); });
+    });
+  }
+  acdModal.addEventListener('click',function(e){ if(e.target===acdModal) acdModal.style.display='none'; });
+  (function(){
+    var g=document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.style.cursor='pointer';
+    var rc=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    rc.setAttribute('x',507);rc.setAttribute('y',495);rc.setAttribute('width',116);rc.setAttribute('height',20);
+    rc.setAttribute('rx','3');rc.setAttribute('fill','rgba(37,99,235,0)');rc.setAttribute('stroke','none');
+    rc.onmouseenter=function(){rc.setAttribute('fill','rgba(37,99,235,.28)');rc.setAttribute('stroke','#2563eb');rc.setAttribute('stroke-width','1.4');};
+    rc.onmouseleave=function(){rc.setAttribute('fill','rgba(37,99,235,0)');rc.setAttribute('stroke','none');};
+    var ti=document.createElementNS('http://www.w3.org/2000/svg','title'); ti.textContent='AC 220V FEEDERS (6)';
+    g.addEventListener('click',function(e){ e.preventDefault(); e.stopPropagation(); if(!moved){ buildAC220DPanel(); acdModal.style.display='block'; } });
+    g.appendChild(rc); g.appendChild(ti); ov.appendChild(g);
+  })();
+  // ---- ① DC 125V FEEDERS (SWGR CONT.) hexagon → wide two-column table ----
+  var DC125={total:'36.8',
+    feeders:[["1","3625SW12A","16","0.38"],["2","3628SW01A-1","63","8.3"],["3","3628SW01A-2","63","-"],["4","3628SW01B-1","63","8.3"],["5","3628SW01B-2","63","-"],["6","3628SW02A-1","16","0.92"],["7","3628SW02A-2","16","-"],["8","3628SW02B-1","16","0.92"],["9","3628SW02B-2","16","-"],["10","3628SW03A-1","16","0.81"],["11","3628SW03A-2","16","-"],["12","3628SW03B-1","16","0.81"],["13","3628SW03B-2","16","-"],["14","3628SW04A-1","16","0.69"],["15","3628SW04A-2","16","-"],["16","3628SW04B-1","16","0.69"],["17","3628SW04B-2","16","-"],["18","3628SW05A-1","16","0.87"],["19","3628SW05A-2","16","-"],["20","3628SW05B-1","16","0.87"],["21","3628SW05B-2","16","-"],["22","3628SW06A-1","16","0.52"],["23","3628SW06A-2","16","-"],["24","3628SW06B-1","16","0.52"],["25","3628SW06B-2","16","-"],["26","SPARE","16",""],["27","SPARE","16",""],["28","3626G01CP","16","0.5"],["29","3607CM001ECP","32","2"],["30","3628EX01","16","0.5"],["31","3607SW01","16","0.5"],["32","3602SW01","16","0.5"],["33","3601SW01","16","1.5"],["34","3608SW01","16","1.5"],["35","3608PM002-DS1","16","0.3"],["36","3608PM002-DS2","16","0.3"],["37","3608PM002CP","16","1"],["38","3625GR01","16","0.5"],["39","3625GR02","16","0.5"],["40","3628GR01A","16","0.5"],["41","3628GR01B","16","0.5"],["42","3628PC01A","16","0.8"],["43","3628PC01B","16","0.8"],["44","SPARE","63",""],["45","SPARE","63",""],["46","SPARE","32",""],["47","SPARE","32",""],["48","SPARE","16",""],["49","SPARE","16",""],["50","SPARE","16",""],["51","SPARE","16",""],["52","SPARE","16",""],["53","SPARE","16",""]]};
+  var dcbModal=document.createElement('div'); dcbModal.style.cssText='display:none;position:fixed;inset:0;z-index:90;background:rgba(8,20,38,.35);';
+  var dcbPanel=document.createElement('div'); dcbPanel.style.cssText='position:absolute;top:0;right:0;height:100%;width:480px;max-width:94vw;background:#f3f6fa;box-shadow:-8px 0 30px rgba(10,30,60,.22);display:flex;flex-direction:column;';
+  dcbModal.appendChild(dcbPanel); document.body.appendChild(dcbModal);
+  function dc125rows(list){
+    return list.map(function(f,i){
+      var spare=/SPARE/i.test(f[1]);
+      var bg=spare?'#eef1f5':(i%2?'#f7f9fc':'#fff');
+      var rid='3628SW02-DC125-F'+('0'+f[0]).slice(-2);
+      var noCell=spare
+        ? '<td style="padding:4px 8px;border-bottom:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;font-weight:600;color:#8a94a3;">'+esc(f[0])+'</td>'
+        : '<td class="dcbRelay" data-id="'+esc(rid)+'" style="padding:4px 8px;border-bottom:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;font-weight:700;color:#0b56a4;text-decoration:underline;cursor:pointer;">'+esc(f[0])+'</td>';
+      return '<tr style="background:'+bg+';">'+noCell+
+        '<td style="padding:4px 9px;border-bottom:1px solid #e3e8ef;border-left:1px solid #e3e8ef;font-family:\'JetBrains Mono\',monospace;font-size:11px;'+(spare?'color:#8a94a3;font-style:italic;':'color:#11202f;')+'">'+esc(f[1])+'</td>'+
+        '<td style="padding:4px 6px;border-bottom:1px solid #e3e8ef;border-left:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;color:#11202f;">'+esc(f[2])+'</td>'+
+        '<td style="padding:4px 6px;border-bottom:1px solid #e3e8ef;border-left:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;font-weight:600;color:#0b56a4;background:'+(f[3]&&f[3]!=='-'?'rgba(11,86,164,.06)':'transparent')+';">'+esc(f[3])+'</td></tr>';
+    }).join('');
+  }
+  function dc125thead(){
+    return '<thead><tr style="background:#11202f;color:#fff;">'+
+      '<th style="padding:7px 6px;text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:10px;">FEEDER<br>NO.</th>'+
+      '<th style="padding:7px 9px;text-align:left;font-family:\'Space Grotesk\',sans-serif;font-size:10px;border-left:1px solid #2c3e52;">FEEDER DESCRIPTION</th>'+
+      '<th style="padding:7px 6px;text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:10px;border-left:1px solid #2c3e52;">MCCB<br>RATING(A)</th>'+
+      '<th style="padding:7px 6px;text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:10px;border-left:1px solid #2c3e52;">RATING<br>(kVA)</th>'+
+      '</tr></thead>';
+  }
+  function buildDC125Panel(){
+    var t1='<table style="width:100%;border-collapse:collapse;">'+dc125thead()+'<tbody>'+dc125rows(DC125.feeders)+
+      '<tr style="background:#dde5ef;font-weight:700;"><td colspan="3" style="padding:6px 9px;text-align:right;font-family:\'Space Grotesk\',sans-serif;font-size:11px;color:#11202f;">TOTAL</td>'+
+      '<td style="padding:6px;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;color:#0b56a4;border-left:1px solid #c4d0de;">'+DC125.total+'</td></tr></tbody></table>';
+    dcbPanel.innerHTML=
+      '<div style="background:linear-gradient(180deg,#0b4f95,#003d7c);color:#fff;padding:16px 20px;display:flex;align-items:center;gap:13px;flex-shrink:0;">'+
+        '<div style="width:34px;height:34px;flex-shrink:0;">'+
+          '<svg width="34" height="34" viewBox="0 0 34 34"><polygon points="9,3 25,3 33,17 25,31 9,31 1,17" fill="rgba(255,255,255,.14)" stroke="#cfe0f5" stroke-width="1.5"/><text x="17" y="22" text-anchor="middle" font-family="Space Grotesk,sans-serif" font-size="15" font-weight="700" fill="#fff">1</text></svg>'+
+        '</div>'+
+        '<div style="flex:1;min-width:0;"><div style="font-family:\'Space Grotesk\',sans-serif;font-size:18px;font-weight:700;letter-spacing:-.01em;">DC 125V FEEDERS</div>'+
+        '<div style="font-size:11.5px;color:#bcd4ef;font-weight:500;margin-top:1px;">CRITICAL USER (FOR SWGR CONT.) · '+DC125.feeders.length+' items</div></div>'+
+        '<button id="dcbClose" style="width:30px;height:30px;border:none;border-radius:8px;background:rgba(255,255,255,.16);color:#fff;font-size:17px;cursor:pointer;flex-shrink:0;">&times;</button>'+
+      '</div>'+
+      '<div style="flex:1;overflow-y:auto;padding:14px;">'+
+        '<div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 3px 14px rgba(10,30,60,.08);border:1px solid #e3e8ef;">'+t1+'</div>'+
+      '</div>';
+    document.getElementById('dcbClose').onclick=function(){ dcbModal.style.display='none'; };
+    Array.prototype.forEach.call(dcbPanel.querySelectorAll('.dcbRelay'),function(el){
+      el.addEventListener('click',function(){ openMCC(el.getAttribute('data-id')); });
+    });
+  }
+  dcbModal.addEventListener('click',function(e){ if(e.target===dcbModal) dcbModal.style.display='none'; });
+  (function(){
+    var g=document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.style.cursor='pointer';
+    var rc=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    rc.setAttribute('x',1305);rc.setAttribute('y',495);rc.setAttribute('width',118);rc.setAttribute('height',20);
+    rc.setAttribute('rx','3');rc.setAttribute('fill','rgba(37,99,235,0)');rc.setAttribute('stroke','none');
+    rc.onmouseenter=function(){rc.setAttribute('fill','rgba(37,99,235,.28)');rc.setAttribute('stroke','#2563eb');rc.setAttribute('stroke-width','1.4');};
+    rc.onmouseleave=function(){rc.setAttribute('fill','rgba(37,99,235,0)');rc.setAttribute('stroke','none');};
+    var ti=document.createElementNS('http://www.w3.org/2000/svg','title'); ti.textContent='DC 125V FEEDERS';
+    g.addEventListener('click',function(e){ e.preventDefault(); e.stopPropagation(); if(!moved){ buildDC125Panel(); dcbModal.style.display='block'; } });
+    g.appendChild(rc); g.appendChild(ti); ov.appendChild(g);
+  })();
+  // ---- ② AC 220V FEEDERS (SWGR CONT.) hexagon → table ----
+  var AC220SW={total:'10.7',
+    feeders:[["1","FIRE ALARM PANEL NO1 IN GSP CCR","16","0.5"],["2","FIRE ALARM PANEL NO2 IN GSP6","32","2.7"],["3","FIRE ALARM PANEL NO3 IN GSP6","16","0.5"],["4","TELEPHONE PABX IN GSP6 S/S","32","2"],["5","CENTRAL CABINET FOR PAGING IN GSP6 S/S","32","2.5"],["6","CONTROL CABINET FOR CCTV IN GSP6 S/S","32","2.5"],["7","SPARE","16",""],["8","SPARE","16",""],["9","SPARE","32",""],["10","SPARE","32",""]]};
+  function ac220rows(list){
+    return list.map(function(f,i){
+      var spare=/SPARE/i.test(f[1]);
+      var bg=spare?'#eef1f5':(i%2?'#f7f9fc':'#fff');
+      var rid='3628SW02-AC220-2-F'+('0'+f[0]).slice(-2);
+      var noCell=spare
+        ? '<td style="padding:4px 8px;border-bottom:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;font-weight:600;color:#8a94a3;">'+esc(f[0])+'</td>'
+        : '<td class="acRelay" data-id="'+rid+'" style="padding:4px 8px;border-bottom:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;font-weight:700;color:#0b56a4;text-decoration:underline;cursor:pointer;">'+esc(f[0])+'</td>';
+      return '<tr style="background:'+bg+';">'+noCell+
+        '<td style="padding:4px 10px;border-bottom:1px solid #e3e8ef;font-family:\'Plus Jakarta Sans\',sans-serif;font-size:11px;color:'+(spare?'#8a94a3':'#25324a')+';'+(spare?'font-style:italic;':'')+'">'+esc(f[1])+'</td>'+
+        '<td style="padding:4px 6px;border-bottom:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;color:#25324a;">'+esc(f[2])+'</td>'+
+        '<td style="padding:4px 6px;border-bottom:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;color:#0b56a4;">'+esc(f[3])+'</td></tr>';
+    }).join('');
+  }
+  function buildAC220SWPanel(){
+    var t1='<table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#11202f;color:#fff;">'+
+      '<th style="padding:7px 6px;text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:10px;">FEEDER<br>NO.</th>'+
+      '<th style="padding:7px 8px;text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:10px;">FEEDER DESCRIPTION</th>'+
+      '<th style="padding:7px 6px;text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:10px;">MCCB<br>RATING(A)</th>'+
+      '<th style="padding:7px 6px;text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:10px;">RATING<br>(kVA)</th>'+
+      '</tr></thead><tbody>'+ac220rows(AC220SW.feeders)+
+      '<tr style="background:#dde5ef;font-weight:700;"><td colspan="3" style="padding:6px 9px;text-align:right;font-family:\'Space Grotesk\',sans-serif;font-size:11px;color:#11202f;">TOTAL</td>'+
+      '<td style="padding:6px;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;color:#0b56a4;border-left:1px solid #c4d0de;">'+AC220SW.total+'</td></tr></tbody></table>';
+    dcbPanel.innerHTML=
+      '<div style="background:linear-gradient(180deg,#0b4f95,#003d7c);color:#fff;padding:16px 20px;display:flex;align-items:center;gap:13px;flex-shrink:0;">'+
+        '<div style="width:34px;height:34px;flex-shrink:0;">'+
+          '<svg width="34" height="34" viewBox="0 0 34 34"><polygon points="9,3 25,3 33,17 25,31 9,31 1,17" fill="rgba(255,255,255,.14)" stroke="#cfe0f5" stroke-width="1.5"/><text x="17" y="22" text-anchor="middle" font-family="Space Grotesk,sans-serif" font-size="15" font-weight="700" fill="#fff">2</text></svg>'+
+        '</div>'+
+        '<div style="flex:1;min-width:0;"><div style="font-family:\'Space Grotesk\',sans-serif;font-size:18px;font-weight:700;letter-spacing:-.01em;">AC 220V FEEDERS</div>'+
+        '<div style="font-size:11.5px;color:#bcd4ef;font-weight:500;margin-top:1px;">CRITICAL USER (FOR SWGR CONT.) · '+AC220SW.feeders.length+' items</div></div>'+
+        '<button id="acbClose" style="width:30px;height:30px;border:none;border-radius:8px;background:rgba(255,255,255,.16);color:#fff;font-size:17px;cursor:pointer;flex-shrink:0;">&times;</button>'+
+      '</div>'+
+      '<div style="flex:1;overflow-y:auto;padding:14px;">'+
+        '<div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 3px 14px rgba(10,30,60,.08);border:1px solid #e3e8ef;">'+t1+'</div>'+
+      '</div>';
+    document.getElementById('acbClose').onclick=function(){ dcbModal.style.display='none'; };
+    Array.prototype.forEach.call(dcbPanel.querySelectorAll('.acRelay'),function(el){
+      el.addEventListener('click',function(){ openMCC(el.getAttribute('data-id')); });
+    });
+  }
+  (function(){
+    var g=document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.style.cursor='pointer';
+    var rc=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    rc.setAttribute('x',1180);rc.setAttribute('y',495);rc.setAttribute('width',115);rc.setAttribute('height',20);
+    rc.setAttribute('rx','3');rc.setAttribute('fill','rgba(37,99,235,0)');rc.setAttribute('stroke','none');
+    rc.onmouseenter=function(){rc.setAttribute('fill','rgba(37,99,235,.28)');rc.setAttribute('stroke','#2563eb');rc.setAttribute('stroke-width','1.4');};
+    rc.onmouseleave=function(){rc.setAttribute('fill','rgba(37,99,235,0)');rc.setAttribute('stroke','none');};
+    var ti=document.createElementNS('http://www.w3.org/2000/svg','title'); ti.textContent='AC 220V FEEDERS';
+    g.addEventListener('click',function(e){ e.preventDefault(); e.stopPropagation(); if(!moved){ buildAC220SWPanel(); dcbModal.style.display='block'; } });
+    g.appendChild(rc); g.appendChild(ti); ov.appendChild(g);
+  })();
+  // ---- ③ AC 220V FEEDERS (SWGR CONT.) hexagon → table ----
+  (function(){
+    var AC3={total:'7.5', feeders:[
+      ["1","F&G PANEL IN GSP6 S/S NORMAL","32","5"],
+      ["2","F&G PANEL IN GSP6 S/S STANDBY","32","-"],
+      ["3","F&G PANEL IN GSP5 CCR NORMAL","16","1"],
+      ["4","F&G PANEL IN GSP5 CCR STANDBY","16","-"],
+      ["5","F/F PANEL FOR GTG IN GSP6 S/S STANDBY","16","0.5"],
+      ["6","F/F PANEL FOR SGC#1 IN GSP6 S/S STANDBY","16","0.5"],
+      ["7","F/F PANEL FOR SGC#1 IN GSP6 S/S STANDBY","16","0.5"],
+      ["8","SPARE","16",""],["9","SPARE","16",""],["10","SPARE","16",""],
+      ["11","SPARE","32",""],["12","SPARE","16",""],["13","SPARE","16",""],
+      ["14","SPARE","16",""],["15","SPARE","16",""]]};
+    var mod=document.createElement('div'); mod.style.cssText='display:none;position:fixed;inset:0;z-index:90;background:rgba(8,20,38,.35);';
+    var pan=document.createElement('div'); pan.style.cssText='position:absolute;top:0;right:0;height:100%;width:440px;max-width:92vw;background:#f3f6fa;box-shadow:-8px 0 30px rgba(10,30,60,.22);display:flex;flex-direction:column;overflow:hidden;';
+    mod.appendChild(pan); document.body.appendChild(mod);
+    mod.addEventListener('click',function(e){ if(e.target===mod) mod.style.display='none'; });
+    function rows(){ return AC3.feeders.map(function(f,i){
+      var spare=/SPARE/i.test(f[1]);
+      var bg=spare?'#eef1f5':(i%2?'#f7f9fc':'#fff');
+      var rid='3628SW02-AC220-3-F'+('0'+f[0]).slice(-2);
+      var noCell=spare
+        ? '<td style="padding:4px 8px;border-bottom:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;font-weight:600;color:#8a94a3;">'+esc(f[0])+'</td>'
+        : '<td class="acx" data-id="'+esc(rid)+'" style="padding:4px 8px;border-bottom:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;font-weight:700;color:#0b56a4;text-decoration:underline;cursor:pointer;">'+esc(f[0])+'</td>';
+      return '<tr style="background:'+bg+';">'+noCell+
+        '<td style="padding:4px 8px;border-bottom:1px solid #e3e8ef;font-size:11px;color:'+(spare?'#8a94a3':'#26313f')+';font-style:'+(spare?'italic':'normal')+';">'+esc(f[1])+'</td>'+
+        '<td style="padding:4px 8px;border-bottom:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;">'+esc(f[2])+'</td>'+
+        '<td style="padding:4px 8px;border-bottom:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;">'+esc(f[3])+'</td></tr>';
+    }).join(''); }
+    function build(){
+      var tbl='<table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#11202f;color:#fff;">'+
+        '<th style="padding:7px 6px;text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:10px;">FEEDER<br>NO.</th>'+
+        '<th style="padding:7px 6px;text-align:left;font-family:\'Space Grotesk\',sans-serif;font-size:10px;">FEEDER DESCRIPTION</th>'+
+        '<th style="padding:7px 6px;text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:10px;">MCCB<br>RATING(A)</th>'+
+        '<th style="padding:7px 6px;text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:10px;">RATING<br>(kVA)</th>'+
+        '</tr></thead><tbody>'+rows()+
+        '<tr style="background:#dde5ef;font-weight:700;"><td colspan="3" style="padding:6px 9px;text-align:right;font-family:\'Space Grotesk\',sans-serif;font-size:11px;color:#11202f;">TOTAL</td>'+
+        '<td style="padding:6px;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;color:#0b56a4;border-left:1px solid #c4d0de;">'+AC3.total+'</td></tr></tbody></table>';
+      pan.innerHTML='<div style="display:flex;align-items:center;gap:12px;padding:16px 18px;background:linear-gradient(120deg,#0b2c55,#123e78);color:#fff;flex-shrink:0;">'+
+        '<div style="width:34px;height:34px;flex-shrink:0;">'+
+          '<svg width="34" height="34" viewBox="0 0 34 34"><polygon points="9,3 25,3 33,17 25,31 9,31 1,17" fill="rgba(255,255,255,.14)" stroke="#cfe0f5" stroke-width="1.5"/><text x="17" y="22" text-anchor="middle" font-family="Space Grotesk,sans-serif" font-size="15" font-weight="700" fill="#fff">3</text></svg>'+
+        '</div>'+
+        '<div style="flex:1;min-width:0;"><div style="font-family:\'Space Grotesk\',sans-serif;font-size:18px;font-weight:700;letter-spacing:-.01em;">AC 220V FEEDERS</div>'+
+        '<div style="font-size:11.5px;color:#bcd4ef;font-weight:500;margin-top:1px;">CRITICAL USER (FOR SWGR CONT.) · '+AC3.feeders.length+' items</div></div>'+
+        '<button id="ac3Close" style="width:30px;height:30px;border:none;border-radius:8px;background:rgba(255,255,255,.16);color:#fff;font-size:17px;cursor:pointer;flex-shrink:0;">&times;</button>'+
+      '</div><div style="flex:1;overflow:auto;padding:14px;">'+tbl+'</div>';
+      pan.querySelector('#ac3Close').onclick=function(){ mod.style.display='none'; };
+      [...pan.querySelectorAll('.acx')].forEach(function(c){ c.onclick=function(){ openMCC(c.getAttribute('data-id')); }; });
+    }
+    var g=document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.style.cursor='pointer';
+    var rc=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    rc.setAttribute('x',1065);rc.setAttribute('y',495);rc.setAttribute('width',115);rc.setAttribute('height',20);
+    rc.setAttribute('rx','3');rc.setAttribute('fill','rgba(37,99,235,0)');rc.setAttribute('stroke','none');
+    rc.onmouseenter=function(){rc.setAttribute('fill','rgba(37,99,235,.28)');rc.setAttribute('stroke','#2563eb');rc.setAttribute('stroke-width','1.4');};
+    rc.onmouseleave=function(){rc.setAttribute('fill','rgba(37,99,235,0)');rc.setAttribute('stroke','none');};
+    var ti=document.createElementNS('http://www.w3.org/2000/svg','title'); ti.textContent='AC 220V FEEDERS (3)';
+    g.addEventListener('click',function(e){ e.preventDefault(); e.stopPropagation(); if(!moved){ build(); mod.style.display='block'; } });
+    g.appendChild(rc); g.appendChild(ti); ov.appendChild(g);
+  })();
+
+  // ---- ①②③④ 380V FEEDERS/MOTORS (3668 board, bottom-right) ----
+  [
+    {n:1,title:'380V FEEDERS',cx:1457,idp:'3668-B1',data:[["3668Y004","3.73",""],["3668Y005A","60",""],["3668Y005B","60",""],["3668Y005R1","","60"],["3668Y005R2","","60"],["3668Y008R","","9.03"],["SPARE","",""],["SPARE","",""]]},
+    {n:2,title:'380V MOTORS',cx:1492,idp:'3668-B2',data:[["3668Y001","37.5",""],["3668Y010CR","","0.75"],["SPARE","",""]]},
+    {n:3,title:'380V FEEDERS',cx:1528,idp:'3668-B3',data:[["3668Y004R","","3.73"],["3668Y005C","60",""],["3668Y005D","60",""],["3668Y005R3","","60"],["3668Y005R4","","60"],["3668Y008","9.03",""],["SPARE","",""],["SPARE","",""]]},
+    {n:4,title:'380V MOTORS',cx:1562,idp:'3668-B4',data:[["3668Y001R","","37.5"],["3668Y010C01","0.75",""],["SPARE","",""]]},
+    {n:5,title:'380V FEEDERS',cx:1672,idp:'3668-B5',data:[["3668Y006A","59",""],["3668Y006R2","","59"],["3668Y007B","","47"],["SPARE","",""]]},
+    {n:6,title:'380V MOTORS',cx:1707,idp:'3668-B6',data:[["3668Y002","18.5",""],["3668Y003","5.6",""],["3668Y009C01","1.5",""],["3668Y011C01","0.4",""],["3668Y013C01","0.4",""],["SPARE","",""]]},
+    {n:7,title:'380V FEEDERS',cx:1743,idp:'3668-B7',data:[["3668Y006B","59",""],["3668Y006R1","","59"],["3668Y007A","","47"],["SPARE","",""]]},
+    {n:8,title:'380V MOTORS',cx:1777,idp:'3668-B8',data:[["3668Y002R","","18.5"],["3668Y009C02","1.5",""],["3668Y009C03","1.5",""],["3668Y012C01","1.5",""],["SPARE","",""]]}
+  ].forEach(function(cfg){
+    var mod=document.createElement('div'); mod.style.cssText='display:none;position:fixed;inset:0;z-index:90;background:rgba(8,20,38,.35);';
+    var pan=document.createElement('div'); pan.style.cssText='position:absolute;top:0;right:0;height:100%;width:440px;max-width:92vw;background:#f3f6fa;box-shadow:-8px 0 30px rgba(10,30,60,.22);display:flex;flex-direction:column;';
+    mod.appendChild(pan); document.body.appendChild(mod);
+    mod.addEventListener('click',function(e){ if(e.target===mod) mod.style.display='none'; });
+    function build(){
+      var rows=cfg.data.map(function(f,i){
+        var spare=/SPARE/i.test(f[0]);
+        var bg=spare?'#eef1f5':(i%2?'#f7f9fc':'#fff');
+        var rid=cfg.idp+'-'+f[0];
+        return '<tr style="background:'+bg+';">'+
+          '<td style="padding:6px 12px;border-bottom:1px solid #e3e8ef;font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:600;'+(spare?'color:#8a94a3;font-style:italic;':'color:#11202f;')+'">'+(spare?esc(f[0]):'<span class="xRelay" data-id="'+esc(rid)+'" style="cursor:pointer;color:#0b56a4;text-decoration:underline;text-underline-offset:2px;">'+esc(f[0])+'</span>')+'</td>'+
+          '<td style="padding:6px 8px;border-bottom:1px solid #e3e8ef;border-left:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;color:#11202f;">'+esc(f[1])+'</td>'+
+          '<td style="padding:6px 8px;border-bottom:1px solid #e3e8ef;border-left:1px solid #e3e8ef;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:600;color:#0b56a4;background:'+(f[2]?'rgba(11,86,164,.06)':'transparent')+';">'+esc(f[2])+'</td>'+
+        '</tr>';
+      }).join('');
+      pan.innerHTML=
+        '<div style="background:linear-gradient(180deg,#0b4f95,#003d7c);color:#fff;padding:16px 20px;display:flex;align-items:center;gap:13px;flex-shrink:0;">'+
+          '<div style="width:34px;height:34px;flex-shrink:0;">'+
+            '<svg width="34" height="34" viewBox="0 0 34 34"><polygon points="9,3 25,3 33,17 25,31 9,31 1,17" fill="rgba(255,255,255,.14)" stroke="#cfe0f5" stroke-width="1.5"/><text x="17" y="22" text-anchor="middle" font-family="Space Grotesk,sans-serif" font-size="15" font-weight="700" fill="#fff">'+cfg.n+'</text></svg>'+
+          '</div>'+
+          '<div style="flex:1;min-width:0;"><div style="font-family:\'Space Grotesk\',sans-serif;font-size:18px;font-weight:700;letter-spacing:-.01em;">'+cfg.title+'</div>'+
+          '<div style="font-size:11.5px;color:#bcd4ef;font-weight:500;margin-top:1px;">3668 · '+cfg.data.length+' items</div></div>'+
+          '<button class="xClose" style="width:30px;height:30px;border:none;border-radius:8px;background:rgba(255,255,255,.16);color:#fff;font-size:17px;cursor:pointer;flex-shrink:0;">&times;</button>'+
+        '</div>'+
+        '<div style="flex:1;overflow-y:auto;padding:14px;">'+
+          '<div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 3px 14px rgba(10,30,60,.08);border:1px solid #e3e8ef;">'+
+            '<table style="width:100%;border-collapse:collapse;">'+
+              '<thead><tr style="background:#11202f;color:#fff;">'+
+                '<th style="padding:9px 12px;text-align:left;font-family:\'Space Grotesk\',sans-serif;font-size:11.5px;letter-spacing:.03em;">MOTOR ITEM NO.</th>'+
+                '<th colspan="2" style="padding:9px 8px;text-align:center;font-family:\'Space Grotesk\',sans-serif;font-size:11.5px;letter-spacing:.03em;border-left:1px solid #2c3e52;">RATING (kW)</th>'+
+              '</tr><tr style="background:#1c3350;color:#cfe0f5;">'+
+                '<th style="padding:4px 12px;"></th>'+
+                '<th style="padding:4px 8px;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;border-left:1px solid #2c3e52;">N</th>'+
+                '<th style="padding:4px 8px;text-align:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;border-left:1px solid #2c3e52;">S</th>'+
+              '</tr></thead><tbody>'+rows+'</tbody>'+
+            '</table>'+
+          '</div>'+
+        '</div>';
+      pan.querySelector('.xClose').onclick=function(){ mod.style.display='none'; };
+      Array.prototype.forEach.call(pan.querySelectorAll('.xRelay'),function(el){ el.addEventListener('click',function(){ openMCC(el.getAttribute('data-id')); }); });
+    }
+    var g=document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.style.cursor='pointer';
+    var rc=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    rc.setAttribute('x',cfg.cx-13);rc.setAttribute('y',502);rc.setAttribute('width',26);rc.setAttribute('height',22);
+    rc.setAttribute('rx','3');rc.setAttribute('fill','rgba(37,99,235,0)');rc.setAttribute('stroke','none');
+    rc.onmouseenter=function(){rc.setAttribute('fill','rgba(37,99,235,.28)');rc.setAttribute('stroke','#2563eb');rc.setAttribute('stroke-width','1.4');};
+    rc.onmouseleave=function(){rc.setAttribute('fill','rgba(37,99,235,0)');rc.setAttribute('stroke','none');};
+    var ti=document.createElementNS('http://www.w3.org/2000/svg','title'); ti.textContent=cfg.title+' ('+cfg.n+')';
+    g.addEventListener('click',function(e){ e.preventDefault(); e.stopPropagation(); if(!moved){ build(); mod.style.display='block'; } });
+    g.appendChild(rc); g.appendChild(ti); ov.appendChild(g);
+  });
 })();
 </script>
 </body>
