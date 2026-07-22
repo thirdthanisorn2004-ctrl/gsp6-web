@@ -528,7 +528,17 @@ class Component extends DCLogic {
       }
       const j = await r.json();
       const map = {};
-      for (const row of (j.data || [])) { if (row.Relay_ID) map[row.Relay_ID] = row; }
+      for (const row of (j.data || [])) {
+        if (!row.Relay_ID) continue;
+        // Device_Number can't be written via the update schema, so edits stash it
+        // in Remark.__dn — restore it onto the column when loading.
+        try {
+          const jj = JSON.parse(row.Remark || '');
+          if (jj && jj.__dn != null) row.Device_Number = jj.__dn;
+          if (jj && jj.__fp) Object.keys(jj.__fp).forEach((k) => { row[k] = jj.__fp[k]; });
+        } catch (e) {}
+        map[row.Relay_ID] = row;
+      }
       this.setState({ relayData: map, authExpired: false });
     } catch (e) {
       this.setState({ relayData: {} });
@@ -1464,9 +1474,9 @@ class Component extends DCLogic {
           if (dbCols.length && !dbCols.includes(k)) continue;
           payload[k] = coerce(k, this.state.editValues[k]);
         }
-        // Backend schema rejects Relay_ID changes (422) — rename is a display name
-        // stored in Remark.__name instead; the DB id never changes.
-        payload.Relay_ID = dbId;
+        // Backend schema rejects Relay_ID (422) — never send it; rename is a display
+        // name stored in Remark.__name instead; the DB id never changes.
+        delete payload.Relay_ID;
         if (newDbId !== dbId) {
           let base = (payload.Remark !== undefined) ? payload.Remark : (baseRow.Remark || '');
           let jj = null; try { jj = JSON.parse(base); } catch (e) {}
@@ -1474,8 +1484,20 @@ class Component extends DCLogic {
           jj.__name = newDbId;
           payload.Remark = JSON.stringify(jj);
         }
+        // Device_Number is also extra_forbidden in the update schema — never send it
+        // as a column; stash it inside the Remark JSON (__dn) so it still syncs.
         const dnStr2 = deviceNumberStr();
-        if (dnStr2 !== null) payload.Device_Number = dnStr2;
+        const fpKeys = Object.keys(payload).filter((k) => k.indexOf('FP_') === 0);
+        if (dnStr2 !== null || fpKeys.length || payload.Remark !== undefined || newDbId !== dbId) {
+          let base2 = (payload.Remark !== undefined) ? payload.Remark : (baseRow.Remark || '');
+          let j2 = null; try { j2 = JSON.parse(base2); } catch (e) {}
+          if (!j2 || typeof j2 !== 'object') { j2 = (base2 && String(base2).trim()) ? { __note: base2 } : {}; }
+          if (newDbId !== dbId) j2.__name = newDbId;
+          if (dnStr2 !== null) j2.__dn = dnStr2;
+          if (fpKeys.length) { j2.__fp = { ...(j2.__fp || {}) }; fpKeys.forEach((k) => { j2.__fp[k] = payload[k]; delete payload[k]; }); }
+          payload.Remark = JSON.stringify(j2);
+        }
+        delete payload.Device_Number;
         const res = await fetch('https://gsp-backend-ppwh.onrender.com/api/relays/' + encodeURIComponent(dbId), {
           method: 'PUT', headers, body: JSON.stringify(payload),
         });
