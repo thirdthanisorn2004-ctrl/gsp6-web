@@ -1464,8 +1464,16 @@ class Component extends DCLogic {
           if (dbCols.length && !dbCols.includes(k)) continue;
           payload[k] = coerce(k, this.state.editValues[k]);
         }
-        if (newDbId !== dbId) { payload.Relay_ID = newDbId; }
-        else { payload.Relay_ID = dbId; }
+        // Backend schema rejects Relay_ID changes (422) — rename is a display name
+        // stored in Remark.__name instead; the DB id never changes.
+        payload.Relay_ID = dbId;
+        if (newDbId !== dbId) {
+          let base = (payload.Remark !== undefined) ? payload.Remark : (baseRow.Remark || '');
+          let jj = null; try { jj = JSON.parse(base); } catch (e) {}
+          if (!jj || typeof jj !== 'object') { jj = (base && String(base).trim()) ? { __note: base } : {}; }
+          jj.__name = newDbId;
+          payload.Remark = JSON.stringify(jj);
+        }
         const dnStr2 = deviceNumberStr();
         if (dnStr2 !== null) payload.Device_Number = dnStr2;
         const res = await fetch('https://gsp-backend-ppwh.onrender.com/api/relays/' + encodeURIComponent(dbId), {
@@ -1493,16 +1501,16 @@ class Component extends DCLogic {
           // Move the relay record under its new DB id, and remember the
           // generated-breaker-id -> db-id mapping so future clicks resolve right.
           const rd = { ...s.relayData };
-          const updatedRow = { ...(rd[dbId] || { Relay_ID: dbId }), ...s.editValues, Relay_ID: newDbId };
+          const updatedRow = { ...(rd[dbId] || { Relay_ID: dbId }), ...s.editValues, Relay_ID: dbId };
           delete updatedRow.__name;
           for (let i = 0; i < 12; i++) { delete updatedRow['DevCell_' + i]; }
           if (dnStr2 !== null) updatedRow.Device_Number = dnStr2;
-          if (newDbId !== dbId) { delete rd[dbId]; }
-          rd[newDbId] = updatedRow;
+          if (payload.Remark !== undefined) updatedRow.Remark = payload.Remark;
+          rd[dbId] = updatedRow;
           // Persist Device Number locally (no DB column for it).
           let deviceNumbers = s.deviceNumbers;
           if (s.editValues.Device_Number !== undefined) {
-            deviceNumbers = { ...s.deviceNumbers, [newDbId]: s.editValues.Device_Number };
+            deviceNumbers = { ...s.deviceNumbers, [dbId]: s.editValues.Device_Number };
             try { localStorage.setItem('gsp6_device_numbers', JSON.stringify(deviceNumbers)); } catch (e) {}
           }
           let relayNames = s.relayNames;
@@ -1513,7 +1521,7 @@ class Component extends DCLogic {
             try { localStorage.setItem('gsp6_relay_names', JSON.stringify(relayNames)); } catch (e) {}
           }
           return {
-            relayData: rd, relayNames, deviceNumbers, deviceCells: collectCells(s.deviceCells, newDbId),
+            relayData: rd, relayNames, deviceNumbers, deviceCells: collectCells(s.deviceCells, dbId),
             editMode: false, editValues: {}, saving: false, saveOk: true,
           };
         });
@@ -1690,11 +1698,16 @@ class Component extends DCLogic {
     const isLV = (id) => !isMV(id);
     const coordSearch = (this.state.coordSearch || '');
     const coordSearchLC = coordSearch.trim().toLowerCase();
+    const coordName = (r0) => {
+      try { const j = JSON.parse(r0.Remark || ''); if (j && j.__name) return j.__name; } catch (e) {}
+      return (names[r0.Relay_ID]) ? names[r0.Relay_ID] : r0.Relay_ID;
+    };
     const coordItems = coordEligible.map((r0) => {
       const id = r0.Relay_ID;
+      const label = coordName(r0);
       const idx = chosen.findIndex((c) => c.Relay_ID === id);
       return {
-        id, checked: !!coordSel[id], lv: isLV(id),
+        id: label, realId: id, checked: !!coordSel[id], lv: isLV(id),
         color: idx >= 0 ? COORD_COLORS[idx % COORD_COLORS.length] : '#cdd5e0',
         pickup: num(r0[coordElem + '_Prim_Amps']) || num(r0[coordElem + '_Pickup']),
         onToggle: () => this.setState((s) => {
@@ -1703,7 +1716,7 @@ class Component extends DCLogic {
           return { coordSel: m };
         }),
       };
-    }).filter((it) => !coordSearchLC || String(it.id).toLowerCase().includes(coordSearchLC));
+    }).filter((it) => !coordSearchLC || String(it.id).toLowerCase().includes(coordSearchLC) || String(it.realId).toLowerCase().includes(coordSearchLC));
     const coordMV = coordItems.filter((it) => !it.lv);
     const coordLV = coordItems.filter((it) => it.lv);
     const onCoordSearch = (e) => { const v = e.target.value; this.setState({ coordSearch: v }); };
