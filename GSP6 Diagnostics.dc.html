@@ -2040,7 +2040,7 @@ class Component extends DCLogic {
       if (!data.length) { return; }
       // Fixed, grouped column order (raw dumps followed row-0 key order and missed FP_ fields)
       const cols = [
-        'Relay_ID', 'Name', 'Plant', 'Breaker', 'Relay_Manufacturer', 'Relay_Model', 'Device_Number',
+        'Relay_ID', 'Name', 'Type', 'Plant', 'Breaker', 'Relay_Manufacturer', 'Relay_Model', 'Device_Number',
         'CT_Ratio', 'CT_Class', 'CT_Burden_VA', 'ZCT_Ratio', 'ZCT_Class', 'ZCT_Burden_VA',
         'Phase_Curve', 'Phase_Pickup', 'Phase_Prim_Amps', 'Phase_Time_Dial', 'Phase_Inst_Pickup', 'Phase_Inst_Prim_Amps', 'Phase_Inst_Delay_s',
         'Ground_Curve', 'Ground_Pickup', 'Ground_Prim_Amps', 'Ground_Time_Dial', 'Ground_Inst_Pickup', 'Ground_Inst_Prim_Amps', 'Ground_Inst_Delay_s',
@@ -2052,6 +2052,7 @@ class Component extends DCLogic {
       const rowsOut = data.map((r) => {
         const o = { ...r };
         o.Name = '';
+        o.Type = 'MV Relay (11kV)';  // default; overridden below if LSIG/MCC present
         // LV breakers keep settings as JSON inside Remark — unpack to readable columns
         try {
           const j = JSON.parse(r.Remark || '');
@@ -2060,6 +2061,7 @@ class Component extends DCLogic {
             o.Remark = j.__note || '';
             const L = j.__lsig;
             if (L) {
+              o.Type = 'LV Breaker · LSIG (0.4kV)';
               o.LSIG_In = L.In; o.LSIG_Tol_pct = L.tol;
               if (L.L && L.L.on !== false) { o.LSIG_L_Ir = L.L.Ir; o.LSIG_L_tr = L.L.tr; }
               if (L.S && L.S.on) { o.LSIG_S_Isd = L.S.Isd; o.LSIG_S_tsd = L.S.tsd; }
@@ -2068,6 +2070,7 @@ class Component extends DCLogic {
             }
             const M = j.__mcc;
             if (M) {
+              o.Type = 'LV Motor · MCC (0.4kV)';
               o.MCC_In = M.In;
               if (M.TOL && M.TOL.on !== false) { o.MCC_TOL_lvl = M.TOL.lvl; o.MCC_TOL_cls = M.TOL.cls; }
               if (M.STALL && M.STALL.on !== false) { o.MCC_STALL_lvl = M.STALL.lvl; o.MCC_STALL_dly = M.STALL.dly; }
@@ -2077,7 +2080,13 @@ class Component extends DCLogic {
           }
         } catch (e) { /* plain-text Remark stays as-is */ }
         return o;
-      }).sort((a, b) => String(a.Relay_ID).localeCompare(String(b.Relay_ID), undefined, { numeric: true }));
+      }).sort((a, b) => {
+        // Group by breaker type first, then by id within each group.
+        const order = { 'MV Relay (11kV)': 0, 'LV Breaker · LSIG (0.4kV)': 1, 'LV Motor · MCC (0.4kV)': 2 };
+        const ta = order[a.Type] != null ? order[a.Type] : 9, tb = order[b.Type] != null ? order[b.Type] : 9;
+        if (ta !== tb) return ta - tb;
+        return String(a.Relay_ID).localeCompare(String(b.Relay_ID), undefined, { numeric: true });
+      });
       const esc = (val) => {
         if (val == null) return '';
         let s = String(val);
