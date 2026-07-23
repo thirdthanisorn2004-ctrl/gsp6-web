@@ -1001,7 +1001,9 @@ class Component extends DCLogic {
     const curFunc = visibleFuncs.find((f) => f.id === funcSel) || visibleFuncs[0];
     const activeSec = { title: curFunc.title, rows: curFunc.rows };
     const offMap = this.state.funcOff || {};
-    const offKey = (fid) => (popupId || '') + '|' + (this.state.activeRelayIdx || 0) + '|' + fid;
+    // Key by the backend Relay_ID (dbId), NOT the hotspot id, so coordination —
+    // which keys by Relay_ID — reads the exact same on/off flag.
+    const offKey = (fid) => (dbId || popupId || '') + '|' + (this.state.activeRelayIdx || 0) + '|' + fid;
     const curOn = curFunc.prot ? !(offMap[offKey(funcSel)] === true) : null;
     const toggleCurFunc = () => {
       if (!isAdmin || !curFunc.prot) return;
