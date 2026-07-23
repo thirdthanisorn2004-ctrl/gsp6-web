@@ -716,7 +716,7 @@ class Component extends DCLogic {
     const levelOf = (y) => y < 250 ? '33 / 11kV' : (y < 560 ? '11kV' : '0.4kV');
     const BRKPTS = [[2505.8,195.1],[2582,238.1],[1291.3,241.4],[2280.3,241.4],[2794.9,250.4],[1794.8,361.1],[152.6,396.1],[251.7,396.4],[342.8,396.4],[461.3,396.4],[556.4,396.4],[646.1,396.4],[732.5,396.4],[819.1,396.4],[901.3,396.6],[988,396.6],[1065.4,396.6],[1157.2,396.6],[1242.1,396.6],[1356.3,396.6],[3441.2,398.8],[1469.4,399.1],[1588,399.1],[1702.7,399.1],[1887.4,399.1],[2002.7,399.1],[2111.8,399.1],[2223.3,399.1],[2327,399.1],[2435.4,399.1],[2507.4,399.1],[2597,399.1],[2689,399.1],[2782.7,399.1],[2894.4,399.1],[3027.8,399.1],[3184.9,399.1],[3264.2,399.1],[3351.7,399.1],[3535.5,399.1],[3626.7,399.1],[732.5,484.8],[2782.7,491.6],[2894.4,492.1],[342.8,497.4],[3441.2,499.8],[646.1,549.4],[3184.9,550.1],[604.5,580],[3224.4,582.7],[342.8,585.5],[3441.2,587.8],[509.2,594.9],[3310.2,597.6],[300.8,604.6],[3487.8,606.9],[1702.7,619.2],[1887.4,619.2],[199.5,619.4],[3585.9,621.9],[1588,659.2],[2002.7,659.2],[1469.4,699.2],[2111.8,699.2],[1356.3,736.6],[2223.3,739.2],[1242.1,769.9],[2327,772.5]];
     const _BRKPTS_OLD = [[2506,195],[2582,238],[1291,241],[2280,241],[2795,251],[1795,361],[153,396],[252,396],[343,397],[461,397],[556,397],[646,397],[733,397],[819,397],[901,397],[988,397],[1065,397],[1157,397],[1242,397],[1356,397],[1469,399],[1588,399],[1703,399],[1887,399],[2003,399],[2112,399],[2223,399],[2327,399],[2413,399],[2485,399],[2574,399],[2666,399],[2760,399],[2872,399],[2959,399],[3038,399],[3126,399],[3215,399],[3310,399],[3401,399],[733,485],[2760,492],[2872,492],[343,498],[3215,500],[646,549],[2959,550],[343,585],[3215,588],[1703,619],[1887,619],[1588,659],[2003,659],[1469,699],[2112,699],[1356,737],[2223,739],[1242,770],[2327,772]];
-    const NO_RELAY = { 'GSP6-R42':1,'GSP6-R43':1,'GSP6-R44':1, 'GSP6-R09':1,'GSP6-R45':1,'GSP6-R46':1,'GSP6-R47':1,'GSP6-R48':1,'GSP6-R49':1,'GSP6-R50':1,'GSP6-R51':1,'GSP6-R52':1,'GSP6-R53':1,'GSP6-R54':1,'GSP6-R55':1,'GSP6-R56':1,'GSP6-R59':1,'GSP6-R60':1,'GSP6-R57':1,'GSP6-R58':1,'GSP6-R61':1,'GSP6-R62':1,'GSP6-R63':1,'GSP6-R64':1,'GSP6-R65':1,'GSP6-R66':1,'GSP6-R67':1,'GSP6-R68':1 };
+    const NO_RELAY = { 'GSP6-R42':1,'GSP6-R43':1,'GSP6-R44':1,'GSP6-R45':1,'GSP6-R46':1,'GSP6-R47':1,'GSP6-R48':1,'GSP6-R49':1,'GSP6-R50':1,'GSP6-R51':1,'GSP6-R52':1,'GSP6-R53':1,'GSP6-R54':1,'GSP6-R55':1,'GSP6-R56':1,'GSP6-R59':1,'GSP6-R60':1,'GSP6-R57':1,'GSP6-R58':1,'GSP6-R61':1,'GSP6-R62':1,'GSP6-R63':1,'GSP6-R64':1,'GSP6-R65':1,'GSP6-R66':1,'GSP6-R67':1,'GSP6-R68':1 };
     const breakerItems = BRKPTS.map((p, i) => {
       const bx = p[0], by = p[1];
       const id = 'GSP6-R' + String(i + 1).padStart(2, '0');
@@ -1715,9 +1715,14 @@ class Component extends DCLogic {
       .sort((a, b) => String(a.Relay_ID).localeCompare(String(b.Relay_ID)));
     const COORD_COLORS = ['#0b56a4', '#c2410c', '#0f8a4d', '#7a4f9e', '#b91c1c', '#0e7490', '#a16207', '#4338ca'];
     const chosen = coordEligible.filter((r0) => coordSel[r0.Relay_ID]);
-        // MV = 33/11kV relays only: GSP6-Rxx and the 11kV motor feeders; everything else is LV
-    const isMV = (id) => /^GSP6-R\d+$/i.test(String(id)) || /^(3601-[12]PM001R?|3601-[12]PM003R?|3603PM001R?|3604PM001R?|3616Y002R?CM01|3618PM001R?)$/i.test(String(id));
-    const isLV = (id) => !isMV(id);
+        // Classify by DATA, not id guesses: a breaker that carries LSIG/MCC trip
+    // settings is 0.4kV (LV); everything else that has protection-relay settings
+    // (Phase/Ground curves via CT) is an 11kV feeder (MV).
+    const rdRemark = (r0) => { try { return JSON.parse((r0 && r0.Remark) || '') || {}; } catch (e) { return {}; } };
+    const rowById = {}; allRows.forEach((r0) => { rowById[r0.Relay_ID] = r0; });
+    const isLVRow = (r0) => { const j = rdRemark(r0); return !!(j.__lsig || j.__mcc); };
+    const isLV = (id) => { const r0 = rowById[id]; return r0 ? isLVRow(r0) : false; };
+    const isMV = (id) => !isLV(id);
     const coordSearch = (this.state.coordSearch || '');
     const coordSearchLC = coordSearch.trim().toLowerCase();
     const coordName = (r0) => {
@@ -2064,7 +2069,14 @@ class Component extends DCLogic {
         } catch (e) { /* plain-text Remark stays as-is */ }
         return o;
       }).sort((a, b) => String(a.Relay_ID).localeCompare(String(b.Relay_ID), undefined, { numeric: true }));
-      const esc = (val) => val == null ? '' : (/[",\n]/.test(String(val)) ? '"' + String(val).replace(/"/g, '""') + '"' : String(val));
+      const esc = (val) => {
+        if (val == null) return '';
+        let s = String(val);
+        // Ratios like "30/1" / "100/1" and device lists get date-mangled by Excel —
+        // force them to text with the ="..." escape so they stay literal.
+        if (/^\d+\/\d+$/.test(s) || /^\d+([,/]\d+)+$/.test(s)) return '="' + s + '"';
+        return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+      };
       const csv = [cols.join(','), ...rowsOut.map((r) => cols.map((c) => esc(r[c])).join(','))].join('\n');
       const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
