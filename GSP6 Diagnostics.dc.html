@@ -1811,7 +1811,14 @@ class Component extends DCLogic {
       };
       // Per-relay on/off (keyed relayId|0|fid). Only hide the whole curve when BOTH
       // the time and instantaneous elements of that side are off.
-      const coordOff = (rid, fid) => (this.state.funcOff || {})[rid + '|0|' + fid] === true;
+      // Popup writes the off-flag as `relayId|<relayIdx>|fid`; coordination shows the
+      // primary relay, but honor an OFF set under ANY index so the toggle syncs here.
+      const coordOff = (rid, fid) => {
+        const m = this.state.funcOff || {};
+        if (m[rid + '|0|' + fid] === true) return true;
+        for (let k = 1; k < 6; k++) { if (m[rid + '|' + k + '|' + fid] === true) return true; }
+        return false;
+      };
       // A function only draws if its device number is present in that relay's meter.
       const coordHas = (r0, fid) => {
         const dnv = (r0 && r0.Device_Number != null) ? String(r0.Device_Number) : '';

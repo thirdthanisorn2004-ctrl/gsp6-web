@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;family=Sarabun:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; }
+    :root {
+      --ink:#11202f; --navy:#0e1a2b; --blue:#0b56a4; --green:#2bd07a;
+      --muted:#586273; --line:#e4e8ee; --panel:#f4f6f9;
+    }
+    .mono { font-family:'JetBrains Mono',monospace; }
+    .disp { font-family:'Space Grotesk',sans-serif; }
+    .kick { font-family:'JetBrains Mono',monospace; font-size:26px; letter-spacing:.25em; color:var(--green); }
+    .card { background:#fff; border:1px solid var(--line); border-radius:16px; }
+  </style>
+</helmet>
+<x-import component-from-global-scope="deck-stage" from="./deck-stage.js" width="1920" height="1080" hint-size="100%,100%">
+
+  <!-- 1 TITLE -->
+  <section data-label="Title" data-speaker-notes="ความรู้พื้นฐานระบบไฟฟ้าที่ใช้ในเว็บ Relay Diagnostics ของ GSP6" style="background:#0e1a2b; color:#fff; font-family:'Sarabun',sans-serif; display:flex; flex-direction:column; justify-content:center; padding:0 140px;">
+    <div class="kick" style="margin-bottom:36px;">GSP6 · ELECTRICAL FUNDAMENTALS</div>
+    <h1 class="disp" style="font-size:88px; margin:0 0 30px; line-height:1.1;">ความรู้ทางไฟฟ้า<br>ระบบป้องกันของสถานี</h1>
+    <p style="font-size:36px; color:#9fb0c4; margin:0;">SLD · CT/ZCT · Device Number · เส้นโค้ง TCC · การจัดลำดับการป้องกัน (Coordination)</p>
+  </section>
+
+  <!-- 2 SLD -->
+  <section data-label="SLD" data-speaker-notes="Single Line Diagram แทนระบบ 3 เฟส ด้วยเส้นเดียว" style="background:#fff; color:#11202f; font-family:'Sarabun',sans-serif; display:flex; flex-direction:column; padding:100px 120px 80px;">
+    <div class="kick" style="color:var(--blue); margin-bottom:22px;">01 · โครงสร้างระบบ</div>
+    <h2 class="disp" style="font-size:64px; margin:0 0 48px;">แผนภาพเส้นเดียว (Single Line Diagram)</h2>
+    <div style="display:flex; gap:40px; flex:1;">
+      <div class="card" style="flex:1; padding:40px;">
+        <div class="disp" style="font-size:34px; font-weight:700; color:var(--blue); margin-bottom:22px;">เส้นทางจ่ายไฟ</div>
+        <div style="font-size:31px; line-height:1.9;">รับไฟ 33/11kV → บัส 11kV<br>→ หม้อแปลง 11/0.4kV<br>→ บัส 0.4kV → โหลด/มอเตอร์</div>
+      </div>
+      <div class="card" style="flex:1; padding:40px;">
+        <div class="disp" style="font-size:34px; font-weight:700; color:var(--blue); margin-bottom:22px;">สัญลักษณ์ที่ต้องรู้</div>
+        <div style="font-size:31px; line-height:1.9;"><strong>X</strong> = เบรกเกอร์ (Breaker)<br>วงกลมคู่ = หม้อแปลง<br><strong>M</strong> = มอเตอร์</div>
+      </div>
+    </div>
+    <div style="border-top:1px solid var(--line); padding-top:30px; margin-top:40px; font-size:30px; color:var(--muted);">SLD ใช้เส้นเดียวแทนสายทั้ง 3 เฟส เพื่อให้อ่านโครงสร้างระบบทั้งสถานีได้ในภาพเดียว</div>
+  </section>
+
+  <!-- 3 PROTECTION LEVELS -->
+  <section data-label="ระดับป้องกัน" data-speaker-notes="อุปกรณ์ป้องกันต่างกันตามระดับแรงดัน" style="background:#f4f6f9; color:#11202f; font-family:'Sarabun',sans-serif; display:flex; flex-direction:column; padding:100px 120px 80px;">
+    <div class="kick" style="color:var(--blue); margin-bottom:22px;">02 · อุปกรณ์ป้องกัน</div>
+    <h2 class="disp" style="font-size:64px; margin:0 0 48px;">ป้องกันตามระดับแรงดัน</h2>
+    <div style="display:flex; flex-direction:column; gap:22px;">
+      <div class="card" style="display:flex; gap:34px; align-items:center; padding:30px 40px;">
+        <div class="disp" style="font-size:34px; font-weight:700; color:var(--blue); min-width:200px;">11 kV</div>
+        <div style="font-size:31px;">Protection Relay (SEL-751 / SEL-710) สั่งตัดเบรกเกอร์ผ่าน CT</div>
+      </div>
+      <div class="card" style="display:flex; gap:34px; align-items:center; padding:30px 40px;">
+        <div class="disp" style="font-size:34px; font-weight:700; color:var(--blue); min-width:200px;">0.4 kV</div>
+        <div style="font-size:31px;">เบรกเกอร์ ACB / MCCB ที่มีหน่วยตัดในตัว — ตั้งค่าแบบ <strong>LSIG</strong></div>
+      </div>
+      <div class="card" style="display:flex; gap:34px; align-items:center; padding:30px 40px;">
+        <div class="disp" style="font-size:34px; font-weight:700; color:var(--blue); min-width:200px;">มอเตอร์</div>
+        <div style="font-size:31px;">Motor Protection Relay (CEM11) — ป้องกันความร้อน โหลดต่ำ เฟสขาด</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 CT / ZCT -->
+  <section data-label="CT / ZCT" data-speaker-notes="หม้อแปลงกระแสแปลงค่าใหญ่เป็นเล็กให้รีเลย์วัด" style="background:#fff; color:#11202f; font-family:'Sarabun',sans-serif; display:flex; flex-direction:column; padding:100px 120px 80px;">
+    <div class="kick" style="color:var(--blue); margin-bottom:22px;">03 · การวัดกระแส</div>
+    <h2 class="disp" style="font-size:64px; margin:0 0 48px;">CT และ ZCT</h2>
+    <div style="display:flex; gap:40px; flex:1;">
+      <div class="card" style="flex:1; padding:40px;">
+        <div class="disp" style="font-size:36px; font-weight:700; color:var(--blue); margin-bottom:20px;">CT · Current Transformer</div>
+        <div style="font-size:31px; line-height:1.8;">แปลงกระแสใหญ่เป็นเล็ก เช่น <span class="mono">400/1</span> — รีเลย์วัดฝั่ง 1A แล้วคูณ ratio กลับเป็นค่าจริง</div>
+      </div>
+      <div class="card" style="flex:1; padding:40px;">
+        <div class="disp" style="font-size:36px; font-weight:700; color:var(--blue); margin-bottom:20px;">ZCT · Zero-sequence CT</div>
+        <div style="font-size:31px; line-height:1.8;">วัดกระแสรั่วลงดิน สำหรับฟังก์ชัน <span class="mono">50N / 51N</span></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:36px; padding:30px 40px; font-size:30px; color:var(--muted);"><strong style="color:var(--ink);">Class 5P20</strong> = ความเพี้ยน ≤ 5% ที่กระแส 20 เท่าของพิกัด · <strong style="color:var(--ink);">Burden</strong> = ภาระ (VA) ที่ CT จ่ายได้</div>
+  </section>
+
+  <!-- 5 DEVICE NUMBERS -->
+  <section data-label="Device No." data-speaker-notes="รหัส ANSI/IEEE C37.2 บอกหน้าที่ป้องกัน" style="background:#0e1a2b; color:#fff; font-family:'Sarabun',sans-serif; display:flex; flex-direction:column; padding:100px 120px 80px;">
+    <div class="kick" style="margin-bottom:22px;">04 · รหัสอุปกรณ์</div>
+    <h2 class="disp" style="font-size:64px; margin:0 0 48px;">Device Number (ANSI / IEEE C37.2)</h2>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:22px;">
+      <div style="background:#16273c; border-radius:14px; padding:26px 34px; font-size:31px;"><span class="mono" style="color:var(--green); font-size:34px; font-weight:600;">50</span> &nbsp;กระแสเกินแบบตัดทันที</div>
+      <div style="background:#16273c; border-radius:14px; padding:26px 34px; font-size:31px;"><span class="mono" style="color:var(--green); font-size:34px; font-weight:600;">51</span> &nbsp;กระแสเกินแบบหน่วงเวลา</div>
+      <div style="background:#16273c; border-radius:14px; padding:26px 34px; font-size:31px;"><span class="mono" style="color:var(--green); font-size:34px; font-weight:600;">50N/51N</span> &nbsp;กระแสเกินลงดิน</div>
+      <div style="background:#16273c; border-radius:14px; padding:26px 34px; font-size:31px;"><span class="mono" style="color:var(--green); font-size:34px; font-weight:600;">49</span> &nbsp;ความร้อนสะสม (Thermal)</div>
+      <div style="background:#16273c; border-radius:14px; padding:26px 34px; font-size:31px;"><span class="mono" style="color:var(--green); font-size:34px; font-weight:600;">27</span> &nbsp;แรงดันต่ำ (Undervoltage)</div>
+      <div style="background:#16273c; border-radius:14px; padding:26px 34px; font-size:31px;"><span class="mono" style="color:var(--green); font-size:34px; font-weight:600;">59</span> &nbsp;แรงดันเกิน (Overvoltage)</div>
+    </div>
+  </section>
+
+  <!-- 6 TCC -->
+  <section data-label="TCC" data-speaker-notes="กราฟเวลา-กระแส บอกว่าตัดเมื่อไหร่ที่กระแสเท่าไหร่" style="background:#fff; color:#11202f; font-family:'Sarabun',sans-serif; display:flex; flex-direction:column; padding:100px 120px 80px;">
+    <div class="kick" style="color:var(--blue); margin-bottom:22px;">05 · เส้นโค้งการตัด</div>
+    <h2 class="disp" style="font-size:64px; margin:0 0 44px;">เส้นโค้ง TCC (Time–Current Curve)</h2>
+    <div style="display:flex; gap:48px; flex:1; align-items:center;">
+      <div style="flex:1;">
+        <div style="font-size:33px; line-height:1.9;">กราฟ log-log: แกน X = กระแส, แกน Y = เวลาตัด<br>ยิ่งกระแสมาก ยิ่งตัดเร็ว</div>
+        <div class="card" style="margin-top:30px; padding:28px 34px; background:var(--panel); border:none;">
+          <div class="mono" style="font-size:30px; color:var(--blue);">t = TD × k / ((I / I<sub>pickup</sub>)<sup>α</sup> − 1)</div>
+          <div style="font-size:27px; color:var(--muted); margin-top:14px;">curve SI / VI / EI ต่างกันที่ค่า k และ α (IEC 60255)</div>
+        </div>
+      </div>
+      <div class="card" style="flex:1; padding:36px; background:#0e1a2b; color:#fff; border:none;">
+        <div class="disp" style="font-size:30px; font-weight:700; color:var(--green); margin-bottom:16px;">ทำไมวาดเป็นแถบ ±5%</div>
+        <div style="font-size:30px; line-height:1.8; color:#c7d2e0;">รีเลย์จริงตัดไม่เป๊ะตามสูตร — มีความคลาดเคลื่อนจากตัวรีเลย์และ CT เว็บจึงวาดตาม <strong style="color:#fff;">IEC 60255-151</strong> เป็นแถบบน–ล่าง</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 LSIG -->
+  <section data-label="LSIG" data-speaker-notes="4 ฟังก์ชันของเบรกเกอร์แรงต่ำ" style="background:#f4f6f9; color:#11202f; font-family:'Sarabun',sans-serif; display:flex; flex-direction:column; padding:100px 120px 80px;">
+    <div class="kick" style="color:var(--blue); margin-bottom:22px;">06 · เบรกเกอร์แรงต่ำ</div>
+    <h2 class="disp" style="font-size:64px; margin:0 0 44px;">การตั้งค่าแบบ LSIG</h2>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:22px;">
+      <div class="card" style="padding:30px 36px;"><span class="disp" style="font-size:34px; font-weight:700; color:var(--blue);">L</span> <span style="font-size:29px; color:var(--muted);">Long-time</span><div style="font-size:30px; margin-top:12px;">โอเวอร์โหลดต่อเนื่อง — Ir, tr (I²t)</div></div>
+      <div class="card" style="padding:30px 36px;"><span class="disp" style="font-size:34px; font-weight:700; color:var(--blue);">S</span> <span style="font-size:29px; color:var(--muted);">Short-time</span><div style="font-size:30px; margin-top:12px;">ลัดวงจรใกล้ หน่วงเวลาเพื่อลำดับ — Isd, tsd</div></div>
+      <div class="card" style="padding:30px 36px;"><span class="disp" style="font-size:34px; font-weight:700; color:var(--blue);">I</span> <span style="font-size:29px; color:var(--muted);">Instantaneous</span><div style="font-size:30px; margin-top:12px;">ลัดวงจรหนัก ตัดทันที — Ii</div></div>
+      <div class="card" style="padding:30px 36px;"><span class="disp" style="font-size:34px; font-weight:700; color:var(--blue);">G</span> <span style="font-size:29px; color:var(--muted);">Ground fault</span><div style="font-size:30px; margin-top:12px;">ป้องกันกระแสลงดิน — Ig, tg</div></div>
+    </div>
+  </section>
+
+  <!-- 7b LSIG PARAMS DETAIL -->
+  <section data-label="LSIG · พารามิเตอร์" data-speaker-notes="ค่าที่ตั้งจริงในแต่ละแถบของ LSIG" style="background:#fff; color:#11202f; font-family:'Sarabun',sans-serif; display:flex; flex-direction:column; padding:100px 120px 80px;">
+    <div class="kick" style="color:var(--blue); margin-bottom:22px;">06 · เบรกเกอร์แรงต่ำ — รายละเอียด</div>
+    <h2 class="disp" style="font-size:60px; margin:0 0 40px;">พารามิเตอร์ในแต่ละแถบ LSIG</h2>
+    <div style="display:flex; flex-direction:column; gap:18px;">
+      <div class="card" style="display:flex; gap:30px; align-items:flex-start; padding:26px 36px;">
+        <div class="disp" style="font-size:32px; font-weight:700; color:#dc2626; min-width:230px;">L · Long-time</div>
+        <div style="font-size:29px; line-height:1.7; flex:1;"><span class="mono">Ir</span> = กระแสตั้งฐาน (มักตั้ง 0.8 × In) · <span class="mono">tr</span> = เวลาหน่วงที่ 6×Ir · ลักษณะ <span class="mono">I²t</span> — ป้องกันสายร้อนจากโหลดเกินยาวนาน</div>
+      </div>
+      <div class="card" style="display:flex; gap:30px; align-items:flex-start; padding:26px 36px;">
+        <div class="disp" style="font-size:32px; font-weight:700; color:#ea580c; min-width:230px;">S · Short-time</div>
+        <div style="font-size:29px; line-height:1.7; flex:1;"><span class="mono">Isd</span> = จุดเริ่มตัด (มัก 4–10 × Ir) · <span class="mono">tsd</span> = เวลาหน่วง (0.1–0.4s) — หน่วงไว้ให้ตัวปลายน้ำตัดก่อน (selectivity)</div>
+      </div>
+      <div class="card" style="display:flex; gap:30px; align-items:flex-start; padding:26px 36px;">
+        <div class="disp" style="font-size:32px; font-weight:700; color:#7c3aed; min-width:230px;">I · Instantaneous</div>
+        <div style="font-size:29px; line-height:1.7; flex:1;"><span class="mono">Ii</span> = จุดตัดทันที (มัก 10 × In) — ไม่มีหน่วงเวลา ตัดลัดวงจรรุนแรงทันที</div>
+      </div>
+      <div class="card" style="display:flex; gap:30px; align-items:flex-start; padding:26px 36px;">
+        <div class="disp" style="font-size:32px; font-weight:700; color:#0f8a4d; min-width:230px;">G · Ground fault</div>
+        <div style="font-size:29px; line-height:1.7; flex:1;"><span class="mono">Ig</span> = จุดตัดกระแสลงดิน · <span class="mono">tg</span> = เวลาหน่วง — เปิดใช้เฉพาะระบบที่ต้องการ (มักปิดไว้ตามค่าเริ่มต้น)</div>
+      </div>
+    </div>
+    <div style="margin-top:30px; font-size:29px; color:var(--muted);"><strong style="color:var(--ink);">In</strong> = พิกัดเฟรมเบรกเกอร์ · <strong style="color:var(--ink);">Tolerance ±%</strong> = ความคลาดเคลื่อนที่เว็บวาดเป็นแถบรอบเส้น</div>
+  </section>
+
+  <!-- 7c MCC OVERVIEW -->
+  <section data-label="MCC · ภาพรวม" data-speaker-notes="7 ฟังก์ชันป้องกันในหน่วย MCC ของมอเตอร์" style="background:#f4f6f9; color:#11202f; font-family:'Sarabun',sans-serif; display:flex; flex-direction:column; padding:100px 120px 80px;">
+    <div class="kick" style="color:var(--blue); margin-bottom:22px;">07 · หน่วยป้องกันมอเตอร์ (MCC)</div>
+    <h2 class="disp" style="font-size:60px; margin:0 0 40px;">7 ฟังก์ชันป้องกันของ MCC</h2>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:18px;">
+      <div class="card" style="padding:24px 32px;"><div class="disp" style="font-size:30px; font-weight:700; color:#dc2626;">TOL · Thermal Overload</div><div style="font-size:27px; color:var(--muted); margin-top:8px;">Trip Level (%) · Trip Class</div></div>
+      <div class="card" style="padding:24px 32px;"><div class="disp" style="font-size:30px; font-weight:700; color:#ea580c;">STALL · High Current</div><div style="font-size:27px; color:var(--muted); margin-top:8px;">Trip Level (%) · Delay (s)</div></div>
+      <div class="card" style="padding:24px 32px;"><div class="disp" style="font-size:30px; font-weight:700; color:#b45309;">PLOSS · Phase Loss</div><div style="font-size:27px; color:var(--muted); margin-top:8px;">Trip Class · Delay (s)</div></div>
+      <div class="card" style="padding:24px 32px;"><div class="disp" style="font-size:30px; font-weight:700; color:#7c3aed;">PIMB · Phase Imbalance</div><div style="font-size:27px; color:var(--muted); margin-top:8px;">Class · Level (%) · Delay (s)</div></div>
+      <div class="card" style="padding:24px 32px;"><div class="disp" style="font-size:30px; font-weight:700; color:#0b56a4;">UV · Under Voltage</div><div style="font-size:27px; color:var(--muted); margin-top:8px;">Level · Delay · Reset · Restart · Vnom</div></div>
+      <div class="card" style="padding:24px 32px;"><div class="disp" style="font-size:30px; font-weight:700; color:#0891b2;">LOWC · Low Current</div><div style="font-size:27px; color:var(--muted); margin-top:8px;">Trip Level (%) · Delay (s)</div></div>
+      <div class="card" style="padding:24px 32px; grid-column:span 2;"><div class="disp" style="font-size:30px; font-weight:700; color:#0f8a4d;">EF · Earth Fault</div><div style="font-size:27px; color:var(--muted); margin-top:8px;">Threshold (mA) · Trip Delay (s)</div></div>
+    </div>
+  </section>
+
+  <!-- 7d MCC TCC -->
+  <section data-label="MCC · เส้นโค้ง" data-speaker-notes="เส้นโค้งตัดของมอเตอร์มาจาก TOL และ Stall" style="background:#0e1a2b; color:#fff; font-family:'Sarabun',sans-serif; display:flex; flex-direction:column; padding:100px 120px 80px;">
+    <div class="kick" style="margin-bottom:22px;">07 · หน่วยป้องกันมอเตอร์ — เส้นโค้ง</div>
+    <h2 class="disp" style="font-size:60px; margin:0 0 40px;">เส้นโค้งตัดของ MCC มาจากไหน</h2>
+    <div style="display:flex; gap:40px; flex:1;">
+      <div style="flex:1; background:#16273c; border-radius:16px; padding:38px;">
+        <div class="disp" style="font-size:30px; font-weight:700; color:var(--green); margin-bottom:16px;">Thermal Overload (TOL)</div>
+        <div class="mono" style="font-size:27px; color:#c7d2e0;">t = Class × 35 / ((M / Level)² − 1)</div>
+        <div style="font-size:28px; color:#9fb0c4; margin-top:14px; line-height:1.7;">M = กระแส (×FLC) · Class = 5/10/20/30 · ยิ่งกระแสสูง ยิ่งตัดเร็วแบบ I²t</div>
+      </div>
+      <div style="flex:1; background:#16273c; border-radius:16px; padding:38px;">
+        <div class="disp" style="font-size:30px; font-weight:700; color:var(--green); margin-bottom:16px;">High Current (Stall)</div>
+        <div style="font-size:28px; color:#9fb0c4; line-height:1.7;">ถ้ากระแส ≥ Stall Level (เช่น 600%) จะตัดที่เวลาหน่วงคงที่ (Trip Delay) — ป้องกันมอเตอร์ค้างตอนสตาร์ท</div>
+      </div>
+    </div>
+    <div style="margin-top:32px; font-size:29px; color:#9fb0c4;">เว็บเลือกเวลาที่<strong style="color:#fff;">น้อยที่สุด</strong>ระหว่าง TOL กับ Stall ที่แต่ละกระแส แล้ววาดเป็นเส้นเดียว (พร้อมแถบ ±Tolerance)</div>
+  </section>
+
+  <!-- 8 MOTOR -->
+  <section data-label="มอเตอร์" data-speaker-notes="ฟังก์ชันป้องกันมอเตอร์ใน CEM11" style="background:#fff; color:#11202f; font-family:'Sarabun',sans-serif; display:flex; flex-direction:column; padding:100px 120px 80px;">
+    <div class="kick" style="color:var(--blue); margin-bottom:22px;">07 · การป้องกันมอเตอร์</div>
+    <h2 class="disp" style="font-size:64px; margin:0 0 44px;">Motor Protection (CEM11)</h2>
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px;">
+      <div class="card" style="padding:28px 32px; font-size:29px;">Thermal Overload<div style="color:var(--muted); font-size:26px; margin-top:8px;">Trip Class 5 / 10 / 20 / 30</div></div>
+      <div class="card" style="padding:28px 32px; font-size:29px;">Stall / High Current<div style="color:var(--muted); font-size:26px; margin-top:8px;">กระแสสูงค้างตอนสตาร์ท</div></div>
+      <div class="card" style="padding:28px 32px; font-size:29px;">Phase Loss / Imbalance<div style="color:var(--muted); font-size:26px; margin-top:8px;">เฟสขาด / ไม่สมดุล</div></div>
+      <div class="card" style="padding:28px 32px; font-size:29px;">Under Voltage<div style="color:var(--muted); font-size:26px; margin-top:8px;">แรงดันตก</div></div>
+      <div class="card" style="padding:28px 32px; font-size:29px;">Low Current<div style="color:var(--muted); font-size:26px; margin-top:8px;">เช่น ปั๊มแห้ง</div></div>
+      <div class="card" style="padding:28px 32px; font-size:29px;">Earth Fault<div style="color:var(--muted); font-size:26px; margin-top:8px;">กระแสลงดิน (mA)</div></div>
+    </div>
+    <div style="margin-top:34px; font-size:30px; color:var(--muted);">FLC (กระแสพิกัด) ≈ P / (√3 × V × cosφ × η)</div>
+  </section>
+
+  <!-- 9 COORDINATION -->
+  <section data-label="Coordination" data-speaker-notes="หลัก selectivity ตัวใกล้ fault ตัดก่อน" style="background:#0e1a2b; color:#fff; font-family:'Sarabun',sans-serif; display:flex; flex-direction:column; padding:100px 120px 80px;">
+    <div class="kick" style="margin-bottom:22px;">08 · การจัดลำดับ</div>
+    <h2 class="disp" style="font-size:64px; margin:0 0 44px;">Coordination — ลำดับการตัด</h2>
+    <div style="display:flex; gap:44px; flex:1;">
+      <div style="flex:1; background:#16273c; border-radius:16px; padding:40px;">
+        <div class="disp" style="font-size:32px; font-weight:700; color:var(--green); margin-bottom:20px;">หลัก Selectivity</div>
+        <div style="font-size:31px; line-height:1.8; color:#c7d2e0;">อุปกรณ์ที่<strong style="color:#fff;">ใกล้จุดลัดวงจรที่สุดต้องตัดก่อน</strong> ตัวที่อยู่เหนือขึ้นไปรอเป็น backup เพื่อไม่ให้ไฟดับเป็นวงกว้าง</div>
+      </div>
+      <div style="flex:1; background:#16273c; border-radius:16px; padding:40px;">
+        <div class="disp" style="font-size:32px; font-weight:700; color:var(--green); margin-bottom:20px;">ตรวจบนกราฟ</div>
+        <div style="font-size:31px; line-height:1.8; color:#c7d2e0;">เส้น downstream ต้องอยู่ซ้าย/ล่างของ upstream และห่างกันอย่างน้อย <strong style="color:#fff;">CTI ≈ 0.2–0.4 วินาที</strong></div>
+      </div>
+    </div>
+    <div style="margin-top:34px; font-size:30px; color:#9fb0c4;">เว็บซ้อนหลายเส้น TCC (MV + LV + มอเตอร์) บนกราฟเดียว และเช็คระยะเวลา Δt ให้อัตโนมัติ</div>
+  </section>
+
+  <!-- 10 CLOSING -->
+  <section data-label="สรุป" data-speaker-notes="สรุป: ความรู้เหล่านี้คือฐานของทุกฟีเจอร์ในเว็บ" style="background:#fff; color:#11202f; font-family:'Sarabun',sans-serif; display:flex; flex-direction:column; justify-content:center; padding:0 140px;">
+    <div class="kick" style="color:var(--blue); margin-bottom:30px;">สรุป</div>
+    <h2 class="disp" style="font-size:70px; margin:0 0 40px; line-height:1.15;">ทุกฟีเจอร์ในเว็บ<br>ตั้งอยู่บนหลักการเหล่านี้</h2>
+    <p style="font-size:34px; color:var(--muted); margin:0; line-height:1.7; max-width:1300px;">SLD บอกโครงสร้าง · CT/ZCT ให้ค่าที่วัด · Device Number บอกหน้าที่ · TCC วาดพฤติกรรมการตัด · Coordination ยืนยันว่าลำดับการป้องกันถูกต้อง</p>
+  </section>
+
+</x-import>
+</x-dc>
+</body>
+</html>
